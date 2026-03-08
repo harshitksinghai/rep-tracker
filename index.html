@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repetition Tracker</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; padding: 12px;
+    max-width: 720px; margin: 0 auto;
+  }
+  h1 { font-size: 1.3rem; padding: 8px 0; color: var(--accent); }
+  h2 { font-size: 1rem; color: var(--text-dim); margin: 16px 0 8px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-dim); cursor: pointer;
+    font-size: 0.85rem; transition: all 0.15s;
+  }
+  .tab:hover { border-color: var(--accent); }
+  .tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .badge {
+    display: inline-block; background: var(--red); color: #fff;
+    border-radius: 10px; padding: 1px 7px; font-size: 0.75rem; margin-left: 4px;
+  }
+
+  /* Task cards */
+  .task-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px; margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .task-card:hover { border-color: var(--accent); }
+  .task-card.overdue { border-left: 3px solid var(--red); }
+  .task-card.due-today { border-left: 3px solid var(--green); }
+  .task-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; word-break: break-word; }
+  .task-meta { font-size: 0.78rem; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .task-meta span { white-space: nowrap; }
+  .task-notes { font-size: 0.82rem; color: var(--text-dim); font-style: italic; margin: 4px 0; }
+  .task-links a { font-size: 0.8rem; color: var(--accent); text-decoration: none; margin-right: 8px; }
+  .task-links a:hover { text-decoration: underline; }
+  .task-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+  /* Buttons */
+  btn, button {
+    padding: 6px 12px; border-radius: 5px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); cursor: pointer;
+    font-size: 0.8rem; transition: all 0.15s;
+  }
+  button:hover { border-color: var(--accent); }
+  .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-green { background: var(--green); color: var(--bg); border-color: var(--green); }
+  .btn-red { background: transparent; color: var(--red); border-color: var(--red); }
+  .btn-orange { background: var(--orange); color: var(--bg); border-color: var(--orange); }
+  .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+
+  /* Form */
+  .form-group { margin-bottom: 10px; }
+  .form-group label { display: block; font-size: 0.82rem; color: var(--text-dim); margin-bottom: 3px; }
+  input, textarea, select {
+    width: 100%; padding: 8px 10px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--bg);
+    color: var(--text); font-size: 0.9rem; font-family: inherit;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* Utility */
+  .hidden { display: none !important; }
+  .empty-state { text-align: center; color: var(--text-dim); padding: 40px 0; font-size: 0.9rem; }
+  .stats-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; text-align: center; flex: 1; min-width: 80px; }
+  .stat-num { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.7rem; color: var(--text-dim); }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: var(--bg); padding: 10px 20px;
+    border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+    z-index: 100; transition: opacity 0.3s; pointer-events: none;
+  }
+  .search-bar { margin-bottom: 12px; }
+  .bulk-bar { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
+  .bulk-bar label { font-size: 0.82rem; color: var(--text-dim); }
+  input[type="checkbox"] { width: auto; margin-right: 6px; accent-color: var(--accent); }
+  .overdue-tag { color: var(--red); font-weight: 600; font-size: 0.75rem; }
+  .due-tag { color: var(--green); font-weight: 600; font-size: 0.75rem; }
+  #loading { text-align: center; padding: 60px 0; color: var(--text-dim); }
+  .seq-viz { font-size: 0.75rem; color: var(--purple); }
+</style>
+</head>
+<body>
+
+<h1>📋 Repetition Tracker</h1>
+
+<div id="loading">Connecting to database...</div>
+<div id="app" class="hidden">
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="stat-due">0</div><div class="stat-label">Due Today</div></div>
+    <div class="stat"><div class="stat-num" id="stat-overdue" style="color:var(--red)">0</div><div class="stat-label">Overdue</div></div>
+    <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="today" onclick="switchTab('today')">Today <span id="badge-today" class="badge hidden">0</span></div>
+    <div class="tab" data-tab="overdue" onclick="switchTab('overdue')">Overdue <span id="badge-overdue" class="badge hidden">0</span></div>
+    <div class="tab" data-tab="all" onclick="switchTab('all')">All Tasks</div>
+    <div class="tab" data-tab="add" onclick="switchTab('add')">+ Add</div>
+  </div>
+
+  <!-- TODAY -->
+  <div id="view-today">
+    <div class="bulk-bar" id="bulk-today-bar" class="hidden">
+      <button class="btn-green btn-sm" onclick="bulkMarkDone('today')">✓ Mark Selected Done</button>
+    </div>
+    <div id="list-today"></div>
+  </div>
+
+  <!-- OVERDUE -->
+  <div id="view-overdue" class="hidden">
+    <button class="btn-orange btn-sm" onclick="catchUpAll()" style="margin-bottom:10px">⚡ Catch-Up All Overdue</button>
+    <div id="list-overdue"></div>
+  </div>
+
+  <!-- ALL -->
+  <div id="view-all" class="hidden">
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search tasks..." oninput="renderAll()">
+    </div>
+    <div id="list-all"></div>
+  </div>
+
+  <!-- ADD/EDIT FORM -->
+  <div id="view-add" class="hidden">
+    <h2 id="form-title">Add New Task</h2>
+    <input type="hidden" id="edit-id">
+    <div class="form-group">
+      <label>Task Name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Coding_Leetcode_197. Rising Temperature">
+    </div>
+    <div class="form-group">
+      <label>Links (one per line)</label>
+      <textarea id="f-links" placeholder="https://leetcode.com/problems/..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="f-notes" placeholder="Optional notes..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>First Date (defaults to today)</label>
+      <input type="date" id="f-date">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-primary" onclick="saveTask()">Save Task</button>
+      <button onclick="cancelEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- Firebase SDK (compat v9 from CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+// ============================================================
+// 🔧 FIREBASE CONFIG - REPLACE WITH YOUR VALUES
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBOl2pAIJFrCG_p2qbmENYnHPs56FE4AeE",
+  authDomain: "rep-tracker-df2e8.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "rep-tracker-df2e8",
+  storageBucket: "rep-tracker-df2e8.firebasestorage.app",
+  messagingSenderId: "1001251936735",
+  appId: "1:1001251936735:web:e97af917453089d0d68c6a",
+  measurementId: "G-87BVF7E3DS"
+};
+// ============================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const tasksRef = db.ref('tasks');
+
+let allTasks = {};  // {firebaseKey: taskObject}
+let currentTab = 'today';
+
+// ============================================================
+// DATE HELPERS
+// ============================================================
+function todayStr() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+function parseDate(str) {
+  // dd/MM/yyyy -> Date
+  const [d, m, y] = str.split('/').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function formatDate(date) {
+  return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+}
+
+function daysBetween(a, b) {
+  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+}
+
+function isToday(dateStr) {
+  return dateStr === todayStr();
+}
+
+function isOverdue(dateStr) {
+  return parseDate(dateStr) < new Date(new Date().toDateString());
+}
+
+function htmlToDate(htmlDate) {
+  // yyyy-mm-dd -> dd/MM/yyyy
+  const [y, m, d] = htmlDate.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function dateToHtml(dStr) {
+  // dd/MM/yyyy -> yyyy-mm-dd
+  const [d, m, y] = dStr.split('/');
+  return `${y}-${m}-${d}`;
+}
+
+// ============================================================
+// SPACED REPETITION LOGIC (matches your TaskManager.java)
+// ============================================================
+function getNextRevision(task) {
+  const revDate = parseDate(task.revisionDate);
+  const seq = task.latestUsedSeqNumber;
+  const increment = (seq === 0) ? 3 : (seq + 2);
+  const newDate = new Date(revDate);
+  newDate.setDate(newDate.getDate() + increment);
+  return {
+    newRevisionDate: formatDate(newDate),
+    previousRevisionDate: task.revisionDate,
+    newRepetitionCount: task.repetitionCount + 1,
+    newSeqNumber: (seq === 0) ? 3 : (seq + 2)
+  };
+}
+
+function catchUpTask(task) {
+  const today = new Date(new Date().toDateString());
+  let revDate = parseDate(task.revisionDate);
+  let prevDate = task.previousRevisionDate ? parseDate(task.previousRevisionDate) : revDate;
+  let seq = task.latestUsedSeqNumber;
+  let rep = task.repetitionCount;
+  let overdue = task.overDueCount || 0;
+
+  while (revDate < today) {
+    const increment = (seq === 0) ? 3 : (seq + 2);
+    prevDate = revDate;
+    revDate = new Date(revDate);
+    revDate.setDate(revDate.getDate() + increment);
+    seq = (seq === 0) ? 3 : (seq + 2);
+    rep++;
+    overdue++;
+  }
+
+  return {
+    revisionDate: formatDate(revDate),
+    previousRevisionDate: formatDate(prevDate),
+    latestUsedSeqNumber: seq,
+    repetitionCount: rep,
+    overDueCount: overdue
+  };
+}
+
+// ============================================================
+// FIREBASE CRUD
+// ============================================================
+function initFirebase() {
+  tasksRef.on('value', (snapshot) => {
+    allTasks = snapshot.val() || {};
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    renderStats();
+    renderCurrentTab();
+  }, (error) => {
+    document.getElementById('loading').textContent = '❌ Connection failed. Check Firebase config.';
+    console.error(error);
+  });
+}
+
+function addTask(task) {
+  const newRef = tasksRef.push();
+  return newRef.set(task);
+}
+
+function updateTask(key, updates) {
+  return tasksRef.child(key).update(updates);
+}
+
+function deleteTask(key) {
+  return tasksRef.child(key).remove();
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function getTaskList() {
+  return Object.entries(allTasks).map(([key, t]) => ({ ...t, _key: key }));
+}
+
+function renderStats() {
+  const tasks = getTaskList();
+  const today = todayStr();
+  const dueToday = tasks.filter(t => t.revisionDate === today).length;
+  const overdue = tasks.filter(t => isOverdue(t.revisionDate)).length;
+  document.getElementById('stat-due').textContent = dueToday;
+  document.getElementById('stat-overdue').textContent = overdue;
+  document.getElementById('stat-total').textContent = tasks.length;
+
+  const bToday = document.getElementById('badge-today');
+  const bOverdue = document.getElementById('badge-overdue');
+  if (dueToday > 0) { bToday.textContent = dueToday; bToday.classList.remove('hidden'); }
+  else { bToday.classList.add('hidden'); }
+  if (overdue > 0) { bOverdue.textContent = overdue; bOverdue.classList.remove('hidden'); }
+  else { bOverdue.classList.add('hidden'); }
+}
+
+function renderCurrentTab() {
+  if (currentTab === 'today') renderToday();
+  else if (currentTab === 'overdue') renderOverdue();
+  else if (currentTab === 'all') renderAll();
+}
+
+function renderToday() {
+  const tasks = getTaskList().filter(t => isToday(t.revisionDate))
+    .sort((a, b) => (a.taskName || '').localeCompare(b.taskName || ''));
+  const el = document.getElementById('list-today');
+  if (tasks.length === 0) {
+    el.innerHTML = '<div class="empty-state">🎉 No tasks due today!</div>';
+    return;
+  }
+  el.innerHTML = tasks.map(t => taskCard(t, 'today')).join('');
+}
+
+function renderOverdue() {
+  const tasks = getTaskList().filter(t => isOverdue(t.revisionDate))
+    .sort((a, b) => parseDate(a.revisionDate) - parseDate(b.revisionDate));
+  const el = document.getElementById('list-overdue');
+  if (tasks.length === 0) {
+    el.innerHTML = '<div class="empty-state">✅ No overdue tasks!</div>';
+    return;
+  }
+  el.innerHTML = tasks.map(t => taskCard(t, 'overdue')).join('');
+}
+
+function renderAll() {
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  let tasks = getTaskList();
+  if (query) tasks = tasks.filter(t => (t.taskName || '').toLowerCase().includes(query) || (t.notes || '').toLowerCase().includes(query));
+  tasks.sort((a, b) => {
+    // Due today first, then overdue, then future
+    const aD = parseDate(a.revisionDate), bD = parseDate(b.revisionDate);
+    return aD - bD;
+  });
+  const el = document.getElementById('list-all');
+  if (tasks.length === 0) {
+    el.innerHTML = '<div class="empty-state">No tasks found.</div>';
+    return;
+  }
+  el.innerHTML = tasks.map(t => taskCard(t, 'all')).join('');
+}
+
+function taskCard(t, view) {
+  const ov = isOverdue(t.revisionDate);
+  const due = isToday(t.revisionDate);
+  const daysOv = ov ? daysBetween(parseDate(t.revisionDate), new Date()) : 0;
+  const nextSeq = (t.latestUsedSeqNumber === 0) ? 3 : (t.latestUsedSeqNumber + 2);
+  const linksHtml = (t.links || []).filter(l => l).map((l, i) => `<a href="${l}" target="_blank" rel="noopener">Link ${i + 1}</a>`).join('');
+
+  let statusTag = '';
+  if (ov) statusTag = `<span class="overdue-tag">OVERDUE (${daysOv}d)</span>`;
+  else if (due) statusTag = `<span class="due-tag">DUE TODAY</span>`;
+
+  return `
+    <div class="task-card ${ov ? 'overdue' : ''} ${due ? 'due-today' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:start;">
+        <div class="task-name">${escHtml(t.taskName)}</div>
+        ${statusTag}
+      </div>
+      <div class="task-meta">
+        <span>📅 Rev: ${t.revisionDate}</span>
+        <span>🔁 ×${t.repetitionCount}</span>
+        <span class="seq-viz">Next: +${nextSeq}d</span>
+        ${(t.overDueCount || 0) > 0 ? `<span style="color:var(--orange)">⚠ Skip:${t.overDueCount}</span>` : ''}
+        <span>📌 Since: ${t.firstDate}</span>
+      </div>
+      ${t.notes ? `<div class="task-notes">${escHtml(t.notes)}</div>` : ''}
+      ${linksHtml ? `<div class="task-links">${linksHtml}</div>` : ''}
+      <div class="task-actions">
+        ${(due || ov) ? `<button class="btn-green btn-sm" onclick="markDone('${t._key}')">✓ Done</button>` : ''}
+        ${ov ? `<button class="btn-orange btn-sm" onclick="catchUpOne('${t._key}')">⚡ Catch-Up</button>` : ''}
+        <button class="btn-sm" onclick="editTask('${t._key}')">✏️ Edit</button>
+        <button class="btn-red btn-sm" onclick="confirmDelete('${t._key}')">🗑</button>
+      </div>
+    </div>`;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function markDone(key) {
+  const task = allTasks[key];
+  if (!task) return;
+  const next = getNextRevision(task);
+  updateTask(key, {
+    revisionDate: next.newRevisionDate,
+    previousRevisionDate: next.previousRevisionDate,
+    repetitionCount: next.newRepetitionCount,
+    latestUsedSeqNumber: next.newSeqNumber
+  });
+  showToast(`Next revision: ${next.newRevisionDate} (+${next.newSeqNumber}d)`);
+}
+
+function catchUpOne(key) {
+  const task = allTasks[key];
+  if (!task) return;
+  const result = catchUpTask(task);
+  updateTask(key, result);
+  showToast(`Caught up → ${result.revisionDate}`);
+}
+
+function catchUpAll() {
+  const tasks = getTaskList().filter(t => isOverdue(t.revisionDate));
+  let count = 0;
+  tasks.forEach(t => {
+    const result = catchUpTask(t);
+    updateTask(t._key, result);
+    count++;
+  });
+  showToast(`Caught up ${count} tasks`);
+}
+
+function editTask(key) {
+  const task = allTasks[key];
+  if (!task) return;
+  document.getElementById('edit-id').value = key;
+  document.getElementById('f-name').value = task.taskName || '';
+  document.getElementById('f-links').value = (task.links || []).join('\n');
+  document.getElementById('f-notes').value = task.notes || '';
+  document.getElementById('f-date').value = dateToHtml(task.firstDate);
+  document.getElementById('form-title').textContent = 'Edit Task';
+  switchTab('add');
+}
+
+function cancelEdit() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-links').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-date').value = '';
+  document.getElementById('form-title').textContent = 'Add New Task';
+  switchTab('today');
+}
+
+function saveTask() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('Task name is required'); return; }
+
+  const links = document.getElementById('f-links').value.split('\n').map(l => l.trim()).filter(l => l);
+  const notes = document.getElementById('f-notes').value.trim();
+  const dateInput = document.getElementById('f-date').value;
+  const editKey = document.getElementById('edit-id').value;
+
+  if (editKey) {
+    // Edit existing
+    updateTask(editKey, { taskName: name, links, notes });
+    showToast('Task updated');
+  } else {
+    // Add new
+    const dateStr = dateInput ? htmlToDate(dateInput) : todayStr();
+    const task = {
+      taskName: name,
+      firstDate: dateStr,
+      revisionDate: dateStr,
+      previousRevisionDate: dateStr,
+      repetitionCount: -1,
+      latestUsedSeqNumber: 0,
+      overDueCount: 0,
+      links,
+      notes
+    };
+    addTask(task);
+    showToast('Task added');
+  }
+  cancelEdit();
+}
+
+function confirmDelete(key) {
+  const task = allTasks[key];
+  if (confirm(`Delete "${task.taskName}"?`)) {
+    deleteTask(key);
+    showToast('Task deleted');
+  }
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  ['today','overdue','all','add'].forEach(v => {
+    document.getElementById('view-' + v).classList.toggle('hidden', v !== tab);
+  });
+  renderCurrentTab();
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 2000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // Default date input to today
+  const today = new Date();
+  document.getElementById('f-date').value = today.toISOString().split('T')[0];
+  initFirebase();
+});
+</script>
+</body>
+</html>
