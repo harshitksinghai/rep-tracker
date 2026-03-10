@@ -27,6 +27,21 @@
   h1 { font-size: 1.3rem; padding: 8px 0; color: var(--accent); }
   h2 { font-size: 1rem; color: var(--text-dim); margin: 16px 0 8px; }
 
+  /* Auth screen */
+  #auth-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 80vh; gap: 16px;
+  }
+  #auth-screen h1 { font-size: 1.5rem; }
+  #auth-screen input {
+    width: 200px; padding: 12px 16px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); font-size: 1.2rem; text-align: center;
+    letter-spacing: 4px;
+  }
+  #auth-screen input:focus { outline: none; border-color: var(--accent); }
+  #auth-error { color: var(--red); font-size: 0.85rem; min-height: 20px; }
+
   /* Tabs */
   .tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
   .tab {
@@ -71,6 +86,7 @@
   .btn-red { background: transparent; color: var(--red); border-color: var(--red); }
   .btn-orange { background: var(--orange); color: var(--bg); border-color: var(--orange); }
   .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+  .btn-undo { background: var(--purple); color: var(--bg); border-color: var(--purple); pointer-events: auto; }
 
   /* Form */
   .form-group { margin-bottom: 10px; }
@@ -94,11 +110,9 @@
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     background: var(--green); color: var(--bg); padding: 10px 20px;
     border-radius: 8px; font-size: 0.85rem; font-weight: 600;
-    z-index: 100; transition: opacity 0.3s; pointer-events: none;
+    z-index: 100; display: flex; align-items: center; gap: 10px;
   }
   .search-bar { margin-bottom: 12px; }
-  .bulk-bar { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
-  .bulk-bar label { font-size: 0.82rem; color: var(--text-dim); }
   input[type="checkbox"] { width: auto; margin-right: 6px; accent-color: var(--accent); }
   .overdue-tag { color: var(--red); font-weight: 600; font-size: 0.75rem; }
   .due-tag { color: var(--green); font-weight: 600; font-size: 0.75rem; }
@@ -108,78 +122,78 @@
 </head>
 <body>
 
-<h1>📋 Repetition Tracker</h1>
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <h1>🔒 Repetition Tracker</h1>
+  <input type="password" id="auth-input" placeholder="••••••" maxlength="6" inputmode="numeric" autofocus>
+  <div id="auth-error"></div>
+</div>
 
-<div id="loading">Connecting to database...</div>
-<div id="app" class="hidden">
+<!-- MAIN APP -->
+<div id="main-app" class="hidden">
+  <h1>📋 Repetition Tracker</h1>
 
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat"><div class="stat-num" id="stat-due">0</div><div class="stat-label">Due Today</div></div>
-    <div class="stat"><div class="stat-num" id="stat-overdue" style="color:var(--red)">0</div><div class="stat-label">Overdue</div></div>
-    <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
-  </div>
+  <div id="loading">Connecting to database...</div>
+  <div id="app" class="hidden">
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" data-tab="today" onclick="switchTab('today')">Today <span id="badge-today" class="badge hidden">0</span></div>
-    <div class="tab" data-tab="overdue" onclick="switchTab('overdue')">Overdue <span id="badge-overdue" class="badge hidden">0</span></div>
-    <div class="tab" data-tab="all" onclick="switchTab('all')">All Tasks</div>
-    <div class="tab" data-tab="add" onclick="switchTab('add')">+ Add</div>
-  </div>
-
-  <!-- TODAY -->
-  <div id="view-today">
-    <div class="bulk-bar" id="bulk-today-bar" class="hidden">
-      <button class="btn-green btn-sm" onclick="bulkMarkDone('today')">✓ Mark Selected Done</button>
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-num" id="stat-due">0</div><div class="stat-label">Due Today</div></div>
+      <div class="stat"><div class="stat-num" id="stat-overdue" style="color:var(--red)">0</div><div class="stat-label">Overdue</div></div>
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
     </div>
-    <div id="list-today"></div>
-  </div>
 
-  <!-- OVERDUE -->
-  <div id="view-overdue" class="hidden">
-    <button class="btn-orange btn-sm" onclick="catchUpAll()" style="margin-bottom:10px">⚡ Catch-Up All Overdue</button>
-    <div id="list-overdue"></div>
-  </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="today" onclick="switchTab('today')">Today <span id="badge-today" class="badge hidden">0</span></div>
+      <div class="tab" data-tab="overdue" onclick="switchTab('overdue')">Overdue <span id="badge-overdue" class="badge hidden">0</span></div>
+      <div class="tab" data-tab="all" onclick="switchTab('all')">All Tasks</div>
+      <div class="tab" data-tab="add" onclick="switchTab('add')">+ Add</div>
+    </div>
 
-  <!-- ALL -->
-  <div id="view-all" class="hidden">
-    <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Search tasks..." oninput="renderAll()">
+    <div id="view-today">
+      <div id="list-today"></div>
     </div>
-    <div id="list-all"></div>
-  </div>
 
-  <!-- ADD/EDIT FORM -->
-  <div id="view-add" class="hidden">
-    <h2 id="form-title">Add New Task</h2>
-    <input type="hidden" id="edit-id">
-    <div class="form-group">
-      <label>Task Name *</label>
-      <input type="text" id="f-name" placeholder="e.g. Coding_Leetcode_197. Rising Temperature">
+    <div id="view-overdue" class="hidden">
+      <button class="btn-orange btn-sm" onclick="catchUpAll()" style="margin-bottom:10px">⚡ Catch-Up All Overdue</button>
+      <div id="list-overdue"></div>
     </div>
-    <div class="form-group">
-      <label>Links (one per line)</label>
-      <textarea id="f-links" placeholder="https://leetcode.com/problems/..."></textarea>
+
+    <div id="view-all" class="hidden">
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search tasks..." oninput="renderAll()">
+      </div>
+      <div id="list-all"></div>
     </div>
-    <div class="form-group">
-      <label>Notes</label>
-      <textarea id="f-notes" placeholder="Optional notes..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>First Date (defaults to today)</label>
-      <input type="date" id="f-date">
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-primary" onclick="saveTask()">Save Task</button>
-      <button onclick="cancelEdit()">Cancel</button>
+
+    <div id="view-add" class="hidden">
+      <h2 id="form-title">Add New Task</h2>
+      <input type="hidden" id="edit-id">
+      <div class="form-group">
+        <label>Task Name *</label>
+        <input type="text" id="f-name" placeholder="e.g. Coding_Leetcode_197. Rising Temperature">
+      </div>
+      <div class="form-group">
+        <label>Links (one per line)</label>
+        <textarea id="f-links" placeholder="https://leetcode.com/problems/..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="f-notes" placeholder="Optional notes..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>First Date (defaults to today)</label>
+        <input type="date" id="f-date">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" onclick="saveTask()">Save Task</button>
+        <button onclick="cancelEdit()">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="toast" class="toast hidden"></div>
 
-<!-- Firebase SDK (compat v9 from CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
@@ -199,12 +213,49 @@ const firebaseConfig = {
 };
 // ============================================================
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const tasksRef = db.ref('tasks');
-
-let allTasks = {};  // {firebaseKey: taskObject}
+const PASSCODE = '246879';
+let allTasks = {};
 let currentTab = 'today';
+let undoStack = [];
+let toastTimer = null;
+let firebaseInitialized = false;
+
+// ============================================================
+// AUTH
+// ============================================================
+const authInput = document.getElementById('auth-input');
+authInput.addEventListener('input', () => {
+  document.getElementById('auth-error').textContent = '';
+  if (authInput.value.length === 6) {
+    if (authInput.value === PASSCODE) {
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      sessionStorage.setItem('rep_auth', '1');
+      if (!firebaseInitialized) bootApp();
+    } else {
+      document.getElementById('auth-error').textContent = 'Wrong passcode';
+      authInput.value = '';
+    }
+  }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('rep_auth') === '1') {
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('main-app').classList.remove('hidden');
+    bootApp();
+  }
+});
+
+function bootApp() {
+  if (firebaseInitialized) return;
+  firebaseInitialized = true;
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.database();
+  window.tasksRef = window.db.ref('tasks');
+  initFirebase();
+}
 
 // ============================================================
 // DATE HELPERS
@@ -213,52 +264,29 @@ function todayStr() {
   const d = new Date();
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
-
 function parseDate(str) {
-  // dd/MM/yyyy -> Date
   const [d, m, y] = str.split('/').map(Number);
   return new Date(y, m - 1, d);
 }
-
 function formatDate(date) {
   return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
 }
-
-function daysBetween(a, b) {
-  return Math.round((b - a) / (1000 * 60 * 60 * 24));
-}
-
-function isToday(dateStr) {
-  return dateStr === todayStr();
-}
-
-function isOverdue(dateStr) {
-  return parseDate(dateStr) < new Date(new Date().toDateString());
-}
-
-function htmlToDate(htmlDate) {
-  // yyyy-mm-dd -> dd/MM/yyyy
-  const [y, m, d] = htmlDate.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function dateToHtml(dStr) {
-  // dd/MM/yyyy -> yyyy-mm-dd
-  const [d, m, y] = dStr.split('/');
-  return `${y}-${m}-${d}`;
-}
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+function isToday(ds) { return ds === todayStr(); }
+function isOverdue(ds) { return parseDate(ds) < new Date(new Date().toDateString()); }
+function htmlToDate(h) { const [y,m,d] = h.split('-'); return `${d}/${m}/${y}`; }
+function dateToHtml(s) { const [d,m,y] = s.split('/'); return `${y}-${m}-${d}`; }
 
 // ============================================================
-// SPACED REPETITION LOGIC (matches your TaskManager.java)
+// SPACED REPETITION
 // ============================================================
 function getNextRevision(task) {
   const revDate = parseDate(task.revisionDate);
   const seq = task.latestUsedSeqNumber;
-  const increment = (seq === 0) ? 3 : (seq + 2);
-  const newDate = new Date(revDate);
-  newDate.setDate(newDate.getDate() + increment);
+  const inc = (seq === 0) ? 3 : (seq + 2);
+  const nd = new Date(revDate); nd.setDate(nd.getDate() + inc);
   return {
-    newRevisionDate: formatDate(newDate),
+    newRevisionDate: formatDate(nd),
     previousRevisionDate: task.revisionDate,
     newRepetitionCount: task.repetitionCount + 1,
     newSeqNumber: (seq === 0) ? 3 : (seq + 2)
@@ -269,80 +297,50 @@ function catchUpTask(task) {
   const today = new Date(new Date().toDateString());
   let revDate = parseDate(task.revisionDate);
   let prevDate = task.previousRevisionDate ? parseDate(task.previousRevisionDate) : revDate;
-  let seq = task.latestUsedSeqNumber;
-  let rep = task.repetitionCount;
-  let overdue = task.overDueCount || 0;
-
+  let seq = task.latestUsedSeqNumber, rep = task.repetitionCount, od = task.overDueCount || 0;
   while (revDate < today) {
-    const increment = (seq === 0) ? 3 : (seq + 2);
+    const inc = (seq === 0) ? 3 : (seq + 2);
     prevDate = revDate;
-    revDate = new Date(revDate);
-    revDate.setDate(revDate.getDate() + increment);
-    seq = (seq === 0) ? 3 : (seq + 2);
-    rep++;
-    overdue++;
+    revDate = new Date(revDate); revDate.setDate(revDate.getDate() + inc);
+    seq = (seq === 0) ? 3 : (seq + 2); rep++; od++;
   }
-
-  return {
-    revisionDate: formatDate(revDate),
-    previousRevisionDate: formatDate(prevDate),
-    latestUsedSeqNumber: seq,
-    repetitionCount: rep,
-    overDueCount: overdue
-  };
+  return { revisionDate: formatDate(revDate), previousRevisionDate: formatDate(prevDate),
+    latestUsedSeqNumber: seq, repetitionCount: rep, overDueCount: od };
 }
 
 // ============================================================
-// FIREBASE CRUD
+// FIREBASE
 // ============================================================
 function initFirebase() {
-  tasksRef.on('value', (snapshot) => {
-    allTasks = snapshot.val() || {};
+  tasksRef.on('value', (snap) => {
+    allTasks = snap.val() || {};
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    renderStats();
-    renderCurrentTab();
-  }, (error) => {
-    document.getElementById('loading').textContent = '❌ Connection failed. Check Firebase config.';
-    console.error(error);
+    renderStats(); renderCurrentTab();
+  }, (err) => {
+    document.getElementById('loading').textContent = '❌ Connection failed.';
+    console.error(err);
   });
 }
-
-function addTask(task) {
-  const newRef = tasksRef.push();
-  return newRef.set(task);
-}
-
-function updateTask(key, updates) {
-  return tasksRef.child(key).update(updates);
-}
-
-function deleteTask(key) {
-  return tasksRef.child(key).remove();
-}
+function addTask(t) { return tasksRef.push().set(t); }
+function updateTask(k, u) { return tasksRef.child(k).update(u); }
+function deleteTask(k) { return tasksRef.child(k).remove(); }
 
 // ============================================================
-// RENDERING
+// RENDER
 // ============================================================
-function getTaskList() {
-  return Object.entries(allTasks).map(([key, t]) => ({ ...t, _key: key }));
-}
+function getTaskList() { return Object.entries(allTasks).map(([k,t]) => ({...t, _key:k})); }
 
 function renderStats() {
-  const tasks = getTaskList();
-  const today = todayStr();
-  const dueToday = tasks.filter(t => t.revisionDate === today).length;
-  const overdue = tasks.filter(t => isOverdue(t.revisionDate)).length;
-  document.getElementById('stat-due').textContent = dueToday;
-  document.getElementById('stat-overdue').textContent = overdue;
+  const tasks = getTaskList(), td = todayStr();
+  const due = tasks.filter(t => t.revisionDate === td).length;
+  const ov = tasks.filter(t => isOverdue(t.revisionDate)).length;
+  document.getElementById('stat-due').textContent = due;
+  document.getElementById('stat-overdue').textContent = ov;
   document.getElementById('stat-total').textContent = tasks.length;
-
-  const bToday = document.getElementById('badge-today');
-  const bOverdue = document.getElementById('badge-overdue');
-  if (dueToday > 0) { bToday.textContent = dueToday; bToday.classList.remove('hidden'); }
-  else { bToday.classList.add('hidden'); }
-  if (overdue > 0) { bOverdue.textContent = overdue; bOverdue.classList.remove('hidden'); }
-  else { bOverdue.classList.add('hidden'); }
+  const bT = document.getElementById('badge-today'), bO = document.getElementById('badge-overdue');
+  if (due > 0) { bT.textContent = due; bT.classList.remove('hidden'); } else bT.classList.add('hidden');
+  if (ov > 0) { bO.textContent = ov; bO.classList.remove('hidden'); } else bO.classList.add('hidden');
 }
 
 function renderCurrentTab() {
@@ -352,83 +350,58 @@ function renderCurrentTab() {
 }
 
 function renderToday() {
-  const tasks = getTaskList().filter(t => isToday(t.revisionDate))
-    .sort((a, b) => (a.taskName || '').localeCompare(b.taskName || ''));
+  const tasks = getTaskList().filter(t => isToday(t.revisionDate)).sort((a,b) => (a.taskName||'').localeCompare(b.taskName||''));
   const el = document.getElementById('list-today');
-  if (tasks.length === 0) {
-    el.innerHTML = '<div class="empty-state">🎉 No tasks due today!</div>';
-    return;
-  }
-  el.innerHTML = tasks.map(t => taskCard(t, 'today')).join('');
+  el.innerHTML = tasks.length === 0 ? '<div class="empty-state">🎉 No tasks due today!</div>' : tasks.map(t => taskCard(t)).join('');
 }
 
 function renderOverdue() {
-  const tasks = getTaskList().filter(t => isOverdue(t.revisionDate))
-    .sort((a, b) => parseDate(a.revisionDate) - parseDate(b.revisionDate));
+  const tasks = getTaskList().filter(t => isOverdue(t.revisionDate)).sort((a,b) => parseDate(a.revisionDate) - parseDate(b.revisionDate));
   const el = document.getElementById('list-overdue');
-  if (tasks.length === 0) {
-    el.innerHTML = '<div class="empty-state">✅ No overdue tasks!</div>';
-    return;
-  }
-  el.innerHTML = tasks.map(t => taskCard(t, 'overdue')).join('');
+  el.innerHTML = tasks.length === 0 ? '<div class="empty-state">✅ No overdue tasks!</div>' : tasks.map(t => taskCard(t)).join('');
 }
 
 function renderAll() {
-  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
   let tasks = getTaskList();
-  if (query) tasks = tasks.filter(t => (t.taskName || '').toLowerCase().includes(query) || (t.notes || '').toLowerCase().includes(query));
-  tasks.sort((a, b) => {
-    // Due today first, then overdue, then future
-    const aD = parseDate(a.revisionDate), bD = parseDate(b.revisionDate);
-    return aD - bD;
-  });
+  if (q) tasks = tasks.filter(t => (t.taskName||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q));
+  tasks.sort((a,b) => parseDate(a.revisionDate) - parseDate(b.revisionDate));
   const el = document.getElementById('list-all');
-  if (tasks.length === 0) {
-    el.innerHTML = '<div class="empty-state">No tasks found.</div>';
-    return;
-  }
-  el.innerHTML = tasks.map(t => taskCard(t, 'all')).join('');
+  el.innerHTML = tasks.length === 0 ? '<div class="empty-state">No tasks found.</div>' : tasks.map(t => taskCard(t)).join('');
 }
 
-function taskCard(t, view) {
-  const ov = isOverdue(t.revisionDate);
-  const due = isToday(t.revisionDate);
+function taskCard(t) {
+  const ov = isOverdue(t.revisionDate), due = isToday(t.revisionDate);
   const daysOv = ov ? daysBetween(parseDate(t.revisionDate), new Date()) : 0;
   const nextSeq = (t.latestUsedSeqNumber === 0) ? 3 : (t.latestUsedSeqNumber + 2);
-  const linksHtml = (t.links || []).filter(l => l).map((l, i) => `<a href="${l}" target="_blank" rel="noopener">Link ${i + 1}</a>`).join('');
+  const links = (t.links||[]).filter(l=>l).map((l,i)=>`<a href="${l}" target="_blank" rel="noopener">Link ${i+1}</a>`).join('');
+  let tag = '';
+  if (ov) tag = `<span class="overdue-tag">OVERDUE (${daysOv}d)</span>`;
+  else if (due) tag = `<span class="due-tag">DUE TODAY</span>`;
 
-  let statusTag = '';
-  if (ov) statusTag = `<span class="overdue-tag">OVERDUE (${daysOv}d)</span>`;
-  else if (due) statusTag = `<span class="due-tag">DUE TODAY</span>`;
-
-  return `
-    <div class="task-card ${ov ? 'overdue' : ''} ${due ? 'due-today' : ''}">
-      <div style="display:flex;justify-content:space-between;align-items:start;">
-        <div class="task-name">${escHtml(t.taskName)}</div>
-        ${statusTag}
-      </div>
-      <div class="task-meta">
-        <span>📅 Rev: ${t.revisionDate}</span>
-        <span>🔁 ×${t.repetitionCount}</span>
-        <span class="seq-viz">Next: +${nextSeq}d</span>
-        ${(t.overDueCount || 0) > 0 ? `<span style="color:var(--orange)">⚠ Skip:${t.overDueCount}</span>` : ''}
-        <span>📌 Since: ${t.firstDate}</span>
-      </div>
-      ${t.notes ? `<div class="task-notes">${escHtml(t.notes)}</div>` : ''}
-      ${linksHtml ? `<div class="task-links">${linksHtml}</div>` : ''}
-      <div class="task-actions">
-        ${(due || ov) ? `<button class="btn-green btn-sm" onclick="markDone('${t._key}')">✓ Done</button>` : ''}
-        ${ov ? `<button class="btn-orange btn-sm" onclick="catchUpOne('${t._key}')">⚡ Catch-Up</button>` : ''}
-        <button class="btn-sm" onclick="editTask('${t._key}')">✏️ Edit</button>
-        <button class="btn-red btn-sm" onclick="confirmDelete('${t._key}')">🗑</button>
-      </div>
-    </div>`;
+  return `<div class="task-card ${ov?'overdue':''} ${due?'due-today':''}">
+    <div style="display:flex;justify-content:space-between;align-items:start">
+      <div class="task-name">${esc(t.taskName)}</div>${tag}
+    </div>
+    <div class="task-meta">
+      <span>📅 Rev: ${t.revisionDate}</span>
+      <span>🔁 ×${t.repetitionCount}</span>
+      <span class="seq-viz">Next: +${nextSeq}d</span>
+      ${(t.overDueCount||0)>0?`<span style="color:var(--orange)">⚠ Skip:${t.overDueCount}</span>`:''}
+      <span>📌 Since: ${t.firstDate}</span>
+    </div>
+    ${t.notes?`<div class="task-notes">${esc(t.notes)}</div>`:''}
+    ${links?`<div class="task-links">${links}</div>`:''}
+    <div class="task-actions">
+      ${(due||ov)?`<button class="btn-green btn-sm" onclick="markDone('${t._key}')">✓ Done</button>`:''}
+      ${ov?`<button class="btn-orange btn-sm" onclick="catchUpOne('${t._key}')">⚡ Catch-Up</button>`:''}
+      <button class="btn-sm" onclick="editTask('${t._key}')">✏️ Edit</button>
+      <button class="btn-red btn-sm" onclick="confirmDelete('${t._key}')">🗑</button>
+    </div>
+  </div>`;
 }
 
-function escHtml(s) {
-  if (!s) return '';
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ============================================================
 // ACTIONS
@@ -436,6 +409,15 @@ function escHtml(s) {
 function markDone(key) {
   const task = allTasks[key];
   if (!task) return;
+  // Snapshot for undo
+  undoStack.push({ key, snapshot: {
+    revisionDate: task.revisionDate,
+    previousRevisionDate: task.previousRevisionDate,
+    repetitionCount: task.repetitionCount,
+    latestUsedSeqNumber: task.latestUsedSeqNumber
+  }, name: task.taskName });
+  if (undoStack.length > 10) undoStack.shift();
+
   const next = getNextRevision(task);
   updateTask(key, {
     revisionDate: next.newRevisionDate,
@@ -443,36 +425,36 @@ function markDone(key) {
     repetitionCount: next.newRepetitionCount,
     latestUsedSeqNumber: next.newSeqNumber
   });
-  showToast(`Next revision: ${next.newRevisionDate} (+${next.newSeqNumber}d)`);
+  showToastUndo(`Next: ${next.newRevisionDate} (+${next.newSeqNumber}d)`);
+}
+
+function undoLast() {
+  if (!undoStack.length) return;
+  const last = undoStack.pop();
+  updateTask(last.key, last.snapshot);
+  showToast(`↩ Undone: ${last.name}`);
 }
 
 function catchUpOne(key) {
-  const task = allTasks[key];
-  if (!task) return;
-  const result = catchUpTask(task);
-  updateTask(key, result);
-  showToast(`Caught up → ${result.revisionDate}`);
+  const task = allTasks[key]; if (!task) return;
+  const r = catchUpTask(task);
+  updateTask(key, r);
+  showToast(`Caught up → ${r.revisionDate}`);
 }
 
 function catchUpAll() {
   const tasks = getTaskList().filter(t => isOverdue(t.revisionDate));
-  let count = 0;
-  tasks.forEach(t => {
-    const result = catchUpTask(t);
-    updateTask(t._key, result);
-    count++;
-  });
-  showToast(`Caught up ${count} tasks`);
+  tasks.forEach(t => updateTask(t._key, catchUpTask(t)));
+  showToast(`Caught up ${tasks.length} tasks`);
 }
 
 function editTask(key) {
-  const task = allTasks[key];
-  if (!task) return;
+  const t = allTasks[key]; if (!t) return;
   document.getElementById('edit-id').value = key;
-  document.getElementById('f-name').value = task.taskName || '';
-  document.getElementById('f-links').value = (task.links || []).join('\n');
-  document.getElementById('f-notes').value = task.notes || '';
-  document.getElementById('f-date').value = dateToHtml(task.firstDate);
+  document.getElementById('f-name').value = t.taskName || '';
+  document.getElementById('f-links').value = (t.links||[]).join('\n');
+  document.getElementById('f-notes').value = t.notes || '';
+  document.getElementById('f-date').value = dateToHtml(t.firstDate);
   document.getElementById('form-title').textContent = 'Edit Task';
   switchTab('add');
 }
@@ -490,72 +472,53 @@ function cancelEdit() {
 function saveTask() {
   const name = document.getElementById('f-name').value.trim();
   if (!name) { alert('Task name is required'); return; }
-
-  const links = document.getElementById('f-links').value.split('\n').map(l => l.trim()).filter(l => l);
+  const links = document.getElementById('f-links').value.split('\n').map(l=>l.trim()).filter(l=>l);
   const notes = document.getElementById('f-notes').value.trim();
   const dateInput = document.getElementById('f-date').value;
   const editKey = document.getElementById('edit-id').value;
 
   if (editKey) {
-    // Edit existing
     updateTask(editKey, { taskName: name, links, notes });
     showToast('Task updated');
   } else {
-    // Add new
     const dateStr = dateInput ? htmlToDate(dateInput) : todayStr();
-    const task = {
-      taskName: name,
-      firstDate: dateStr,
-      revisionDate: dateStr,
-      previousRevisionDate: dateStr,
-      repetitionCount: -1,
-      latestUsedSeqNumber: 0,
-      overDueCount: 0,
-      links,
-      notes
-    };
-    addTask(task);
+    addTask({ taskName: name, firstDate: dateStr, revisionDate: dateStr, previousRevisionDate: dateStr,
+      repetitionCount: -1, latestUsedSeqNumber: 0, overDueCount: 0, links, notes });
     showToast('Task added');
   }
   cancelEdit();
 }
 
 function confirmDelete(key) {
-  const task = allTasks[key];
-  if (confirm(`Delete "${task.taskName}"?`)) {
-    deleteTask(key);
-    showToast('Task deleted');
-  }
+  const t = allTasks[key];
+  if (confirm(`Delete "${t.taskName}"?`)) { deleteTask(key); showToast('Task deleted'); }
 }
 
 // ============================================================
-// UI HELPERS
+// UI
 // ============================================================
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  ['today','overdue','all','add'].forEach(v => {
-    document.getElementById('view-' + v).classList.toggle('hidden', v !== tab);
-  });
+  ['today','overdue','all','add'].forEach(v => document.getElementById('view-'+v).classList.toggle('hidden', v !== tab));
   renderCurrentTab();
 }
 
 function showToast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
+  el.innerHTML = esc(msg);
   el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 2000);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 2500);
 }
 
-// ============================================================
-// INIT
-// ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  // Default date input to today
-  const today = new Date();
-  document.getElementById('f-date').value = today.toISOString().split('T')[0];
-  initFirebase();
-});
+function showToastUndo(msg) {
+  const el = document.getElementById('toast');
+  el.innerHTML = `<span>${esc(msg)}</span><button class="btn-undo btn-sm" onclick="undoLast()">↩ Undo</button>`;
+  el.classList.remove('hidden');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 5000);
+}
 </script>
 </body>
 </html>
