@@ -253,11 +253,14 @@ function bootApp() {
   firebaseInitialized = true;
   document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
   firebase.initializeApp(firebaseConfig);
-  firebase.auth().signInAnonymously().then(() => {
-    window.db = firebase.database();
-    window.tasksRef = window.db.ref('tasks');
-    initFirebase();
-  }).catch((err) => {
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      window.db = firebase.database();
+      window.tasksRef = window.db.ref('tasks');
+      initFirebase();
+    }
+  });
+  firebase.auth().signInAnonymously().catch((err) => {
     document.getElementById('loading').textContent = '❌ Auth failed: ' + err.message;
   });
 }
