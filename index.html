@@ -195,6 +195,7 @@
 <div id="toast" class="toast hidden"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
@@ -252,9 +253,13 @@ function bootApp() {
   firebaseInitialized = true;
   document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
   firebase.initializeApp(firebaseConfig);
-  window.db = firebase.database();
-  window.tasksRef = window.db.ref('tasks');
-  initFirebase();
+  firebase.auth().signInAnonymously().then(() => {
+    window.db = firebase.database();
+    window.tasksRef = window.db.ref('tasks');
+    initFirebase();
+  }).catch((err) => {
+    document.getElementById('loading').textContent = '❌ Auth failed: ' + err.message;
+  });
 }
 
 // ============================================================
