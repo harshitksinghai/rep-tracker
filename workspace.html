@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Root ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #08080f;
+  --s0:          #0d0d16;
+  --s1:          #12121e;
+  --s2:          #181826;
+  --s3:          #1f1f30;
+  --s4:          #282840;
+  --bd0:         rgba(255,255,255,0.035);
+  --bd1:         rgba(255,255,255,0.07);
+  --bd2:         rgba(255,255,255,0.13);
+  --bd3:         rgba(255,255,255,0.22);
+  --tx0:         #eee8de;
+  --tx1:         #9090a6;
+  --tx2:         #55556a;
+  --gold:        #c9a84c;
+  --gold-glow:   rgba(201,168,76,0.18);
+  --blue:        #58a6ff;
+  --blue-glow:   rgba(88,166,255,0.15);
+  --green:       #5dba72;
+  --red:         #e06b6b;
+  --orange:      #d29922;
+  --purple:      #bc8cff;
+  --r-sm:        6px;
+  --r-md:        10px;
+  --r-lg:        14px;
+  --r-xl:        18px;
+  --nav-h:       56px;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--tx0);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 99px; }
+
+/* ── Screens ───────────────────────────────────────── */
+.screen { display: none; height: 100dvh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── Shared Buttons ────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--r-sm);
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 400;
+  transition: all 0.15s; line-height: 1; white-space: nowrap;
+}
+.btn-ghost { background: transparent; color: var(--tx1); border: 1px solid var(--bd1); }
+.btn-ghost:hover { background: var(--s1); color: var(--tx0); border-color: var(--bd2); }
+.btn-gold { background: var(--gold); color: #160e00; font-weight: 500; border: 1px solid transparent; }
+.btn-gold:hover { background: #d4b05a; box-shadow: 0 4px 16px rgba(201,168,76,0.28); transform: translateY(-1px); }
+.btn-blue { background: var(--blue); color: #050f1c; font-weight: 500; border: 1px solid transparent; }
+.btn-blue:hover { background: #79b9ff; box-shadow: 0 4px 16px rgba(88,166,255,0.25); transform: translateY(-1px); }
+.btn-danger { background: rgba(224,107,107,0.1); color: var(--red); border: 1px solid rgba(224,107,107,0.18); }
+.btn-danger:hover { background: rgba(224,107,107,0.2); }
+.btn-sm { padding: 6px 12px; font-size: 12.5px; }
+.btn-xs { padding: 4px 9px; font-size: 11.5px; }
+
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  background: transparent; border: none; color: var(--tx2);
+  cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--s2); color: var(--tx0); }
+.icon-btn.d:hover { background: rgba(224,107,107,0.12); color: var(--red); }
+
+/* ── Form Inputs (shared) ──────────────────────────── */
+.finput, .ftextarea, .fselect {
+  width: 100%; background: var(--s2); border: 1px solid var(--bd1);
+  border-radius: var(--r-sm); color: var(--tx0);
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+  padding: 9px 12px; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.finput:focus, .ftextarea:focus, .fselect:focus {
+  border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.ftextarea { resize: vertical; min-height: 72px; line-height: 1.45; }
+.finput.err { border-color: var(--red); }
+.fg { display: flex; flex-direction: column; gap: 6px; }
+.flabel { font-size: 11px; font-weight: 500; color: var(--tx1); text-transform: uppercase; letter-spacing: 0.6px; }
+
+/* ── Top Nav Bar (sub-apps) ─────────────────────────── */
+.app-nav {
+  height: var(--nav-h); display: flex; align-items: center;
+  padding: 0 16px; gap: 10px;
+  border-bottom: 1px solid var(--bd0);
+  background: var(--bg); flex-shrink: 0; z-index: 20;
+}
+.app-nav-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; letter-spacing: -0.3px; flex: 1; text-align: center; }
+.app-nav-side { width: 80px; display: flex; }
+.app-nav-side.right { justify-content: flex-end; }
+
+/* ── Shared Overlay/Modal ──────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(5px); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn  { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal {
+  background: var(--s1); border: 1px solid var(--bd2); border-radius: var(--r-xl);
+  width: 100%; max-width: 448px; box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  animation: popIn 0.2s ease; overflow: hidden;
+}
+.modal-hdr {
+  padding: 20px 22px 16px; border-bottom: 1px solid var(--bd0);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; letter-spacing: -0.3px; }
+.modal-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; }
+.modal-foot { padding: 14px 22px; border-top: 1px solid var(--bd0); display: flex; gap: 7px; align-items: center; }
+.modal-foot-spacer { flex: 1; }
+
+/* ── Toast ─────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--s2); border: 1px solid var(--bd2); color: var(--tx0);
+  padding: 11px 18px; border-radius: var(--r-md); font-size: 13px;
+  z-index: 300; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5); white-space: nowrap;
+  animation: fadeIn 0.2s ease; pointer-events: auto;
+}
+#toast.hidden { display: none !important; }
+.btn-undo { background: var(--purple); color: #fff; border: none; }
+.btn-undo:hover { background: #cba0ff; }
+
+/* ════════════════════════════════════════════════════════
+   AUTH SCREEN
+══════════════════════════════════════════════════════════ */
+#screen-auth {
+  align-items: center; justify-content: center; gap: 0;
+  background: radial-gradient(ellipse at 40% 40%, rgba(201,168,76,0.05) 0%, transparent 70%),
+              radial-gradient(ellipse at 70% 70%, rgba(88,166,255,0.04) 0%, transparent 60%),
+              var(--bg);
+}
+.auth-card {
+  width: 100%; max-width: 380px; padding: 40px 36px;
+  background: var(--s0); border: 1px solid var(--bd1);
+  border-radius: 20px; box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column; gap: 24px;
+}
+.auth-logo { text-align: center; }
+.auth-logo-name {
+  display: block; font-family: 'Fraunces', serif; font-size: 28px;
+  font-weight: 500; letter-spacing: -0.5px; color: var(--tx0);
+}
+.auth-logo-sub {
+  display: block; font-family: 'Fraunces', serif; font-size: 13px;
+  font-style: italic; font-weight: 300; color: var(--tx2); margin-top: 4px;
+}
+.auth-fields { display: flex; flex-direction: column; gap: 12px; }
+.auth-error {
+  font-size: 12.5px; color: var(--red); text-align: center;
+  min-height: 18px; line-height: 1.4;
+}
+.auth-hint { font-size: 11.5px; color: var(--tx2); text-align: center; line-height: 1.5; }
+
+/* ════════════════════════════════════════════════════════
+   HOME SCREEN
+══════════════════════════════════════════════════════════ */
+#screen-home { overflow-y: auto; }
+.home-nav {
+  height: var(--nav-h); display: flex; align-items: center;
+  padding: 0 24px; gap: 12px;
+  border-bottom: 1px solid var(--bd0); flex-shrink: 0;
+}
+.home-wordmark { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--tx0); flex: 1; }
+.home-user-email { font-size: 12px; color: var(--tx2); font-family: 'DM Mono', monospace; }
+
+.home-body { flex: 1; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 32px; }
+.home-greeting {
+  text-align: center;
+}
+.home-greeting-head {
+  font-family: 'Fraunces', serif; font-size: 32px; font-weight: 300;
+  font-style: italic; color: var(--tx0); letter-spacing: -0.5px;
+}
+.home-greeting-sub { font-size: 14px; color: var(--tx2); margin-top: 6px; }
+
+.home-tiles { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 720px; }
+
+.app-tile {
+  flex: 1; min-width: 280px; max-width: 340px;
+  background: var(--s0); border: 1px solid var(--bd1);
+  border-radius: 20px; padding: 28px 24px;
+  cursor: pointer; transition: all 0.2s ease;
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative; overflow: hidden;
+}
+.app-tile::before {
+  content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.2s;
+  border-radius: 20px;
+}
+.app-tile.stratum-tile::before { background: radial-gradient(ellipse at top left, rgba(201,168,76,0.08), transparent 60%); }
+.app-tile.rep-tile::before     { background: radial-gradient(ellipse at top left, rgba(88,166,255,0.08), transparent 60%); }
+.app-tile:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.4); border-color: var(--bd2); }
+.app-tile:hover::before { opacity: 1; }
+.app-tile-icon { font-size: 28px; }
+.app-tile-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; letter-spacing: -0.4px; }
+.stratum-tile .app-tile-name { color: var(--gold); }
+.rep-tile     .app-tile-name { color: var(--blue); }
+.app-tile-desc { font-size: 13px; color: var(--tx1); line-height: 1.55; }
+.app-tile-stats { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--bd0); display: flex; gap: 16px; }
+.tile-stat-num { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; }
+.stratum-tile .tile-stat-num { color: var(--gold); }
+.rep-tile     .tile-stat-num { color: var(--blue); }
+.tile-stat-lbl { font-size: 11px; color: var(--tx2); margin-top: 2px; }
+.tile-stat-item { display: flex; flex-direction: column; }
+.tile-arrow {
+  position: absolute; bottom: 22px; right: 22px;
+  color: var(--tx2); font-size: 18px;
+  transition: transform 0.2s, color 0.2s;
+}
+.app-tile:hover .tile-arrow { transform: translate(3px, -3px); color: var(--tx1); }
+
+/* ════════════════════════════════════════════════════════
+   STRATUM APP
+══════════════════════════════════════════════════════════ */
+#screen-stratum { flex-direction: column; }
+#st-board-wrap { flex: 1; overflow: hidden; }
+#st-board {
+  height: 100%; display: flex; align-items: flex-start;
+  gap: 14px; padding: 18px; overflow-x: auto; overflow-y: hidden;
+}
+
+/* Columns */
+.st-col {
+  width: 302px; min-width: 302px; height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--s0); border: 1px solid var(--bd0);
+  border-radius: var(--r-xl); transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden; position: relative;
+}
+.st-col:hover { border-color: var(--bd1); }
+.st-col.drag-over { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
+.st-col.dragging { opacity: 0.35; }
+
+.st-col-hdr { padding: 16px 14px 13px; cursor: grab; user-select: none; flex-shrink: 0; border-bottom: 1px solid var(--bd0); }
+.st-col-hdr:active { cursor: grabbing; }
+.st-stripe { height: 2.5px; width: 36px; border-radius: 99px; margin-bottom: 13px; transition: width 0.3s; }
+.st-col:hover .st-stripe { width: 56px; }
+.st-col-hdr-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.st-col-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; letter-spacing: -0.3px; color: var(--tx0); cursor: pointer; }
+.st-col-title:hover { opacity: 0.75; }
+.st-col-count { font-size: 11px; color: var(--tx2); margin-top: 4px; font-family: 'DM Mono', monospace; }
+.st-col-btns { display: flex; gap: 1px; opacity: 0; transition: opacity 0.15s; }
+.st-col:hover .st-col-btns { opacity: 1; }
+
+.st-col-menu {
+  position: absolute; top: 54px; right: 12px;
+  background: var(--s2); border: 1px solid var(--bd2); border-radius: var(--r-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 40; min-width: 162px;
+  overflow: hidden; animation: popIn 0.15s ease;
+}
+.st-menu-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 14px; font-size: 13px; color: var(--tx1); cursor: pointer; transition: background 0.1s;
+}
+.st-menu-item:hover { background: var(--s3); color: var(--tx0); }
+.st-menu-item.d { color: var(--red); }
+.st-menu-item.d:hover { background: rgba(224,107,107,0.1); }
+.st-menu-divider { height: 1px; background: var(--bd0); margin: 3px 0; }
+
+.st-col-body { flex: 1; overflow-y: auto; padding: 10px 10px 4px; display: flex; flex-direction: column; gap: 7px; }
+.st-col-foot { padding: 8px 10px 10px; flex-shrink: 0; border-top: 1px solid var(--bd0); }
+.st-btn-add {
+  width: 100%; display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px; background: transparent; border: 1px dashed var(--bd1);
+  border-radius: var(--r-md); color: var(--tx2); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 12.5px; transition: all 0.15s;
+}
+.st-btn-add:hover { background: var(--s1); border-color: var(--bd2); color: var(--tx1); }
+
+/* Goal cards */
+.st-gcard {
+  background: var(--s1); border: 1px solid var(--bd0); border-radius: var(--r-md);
+  padding: 11px 11px 10px; cursor: pointer; transition: all 0.13s ease;
+  animation: cardIn 0.18s ease;
+}
+.st-gcard:hover { background: var(--s2); border-color: var(--bd1); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+.st-gcard.done .st-gtext { text-decoration: line-through; color: var(--tx2); }
+.st-gcard.dim { opacity: 0.28; }
+.st-gcard.hl-self   { border-color: var(--col-c, var(--gold)); box-shadow: 0 0 0 1px var(--col-c, var(--gold)), 0 4px 20px rgba(0,0,0,0.3); background: var(--s2); }
+.st-gcard.hl-parent { border-color: rgba(201,168,76,0.35); background: rgba(201,168,76,0.04); }
+.st-gcard.hl-child  { border-color: rgba(201,168,76,0.18); background: rgba(201,168,76,0.02); }
+
+.st-gcard-row { display: flex; align-items: flex-start; gap: 9px; }
+.st-gcheck {
+  width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--bd2);
+  flex-shrink: 0; margin-top: 1px; cursor: pointer; transition: all 0.18s;
+  display: flex; align-items: center; justify-content: center;
+}
+.st-gcheck:hover { border-color: var(--col-c, var(--gold)); }
+.st-gcard.done .st-gcheck { background: var(--col-c, var(--green)); border-color: var(--col-c, var(--green)); }
+.st-gcheck-ico { display: none; }
+.st-gcard.done .st-gcheck-ico { display: block; }
+.st-gtext-wrap { flex: 1; min-width: 0; }
+.st-gtext { font-size: 13px; line-height: 1.45; word-break: break-word; color: var(--tx0); }
+.st-gnotes { font-size: 11.5px; color: var(--tx2); line-height: 1.4; margin-top: 4px; }
+.st-gmeta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.st-parent-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px 2px 6px;
+  border-radius: 99px; font-size: 11px; background: var(--gold-glow);
+  border: 1px solid rgba(201,168,76,0.2); color: var(--gold); cursor: pointer; max-width: 180px; transition: background 0.12s;
+}
+.st-parent-chip:hover { background: rgba(201,168,76,0.25); }
+.st-parent-chip-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-child-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border-radius: 99px; font-size: 11px; background: var(--s3); color: var(--tx2);
+}
+.st-gcard-btns { display: flex; gap: 1px; opacity: 0; transition: opacity 0.12s; flex-shrink: 0; margin-top: -2px; }
+.st-gcard:hover .st-gcard-btns { opacity: 1; }
+
+/* Inline editor */
+.st-inline-wrap { background: var(--s1); border: 1px solid var(--gold); border-radius: var(--r-md); padding: 10px 11px; box-shadow: 0 0 0 3px var(--gold-glow); }
+.st-inline-ta { width: 100%; background: var(--s2); border: 1px solid var(--bd1); border-radius: var(--r-sm); color: var(--tx0); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px; resize: none; outline: none; line-height: 1.45; }
+.st-inline-ta:focus { border-color: var(--gold); }
+.st-inline-row { display: flex; align-items: center; gap: 6px; margin-top: 7px; }
+.st-inline-hint { font-size: 11px; color: var(--tx2); flex: 1; }
+
+/* Done section */
+.st-done-hdr {
+  display: flex; align-items: center; gap: 6px; padding: 8px 2px 4px;
+  cursor: pointer; color: var(--tx2); font-size: 11.5px;
+  border-top: 1px solid var(--bd0); margin-top: 4px; user-select: none; transition: color 0.12s;
+}
+.st-done-hdr:hover { color: var(--tx1); }
+.st-done-arrow { transition: transform 0.2s; display: inline-block; }
+.st-done-arrow.open { transform: rotate(90deg); }
+
+/* Empty states */
+.st-empty-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px; color: var(--tx2); text-align: center; }
+.st-empty-col-ico { font-size: 22px; opacity: 0.4; }
+.st-empty-col-txt { font-size: 12px; line-height: 1.5; }
+#st-empty-board { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; width: 100%; color: var(--tx2); }
+.st-empty-board-head { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300; font-style: italic; color: var(--tx1); }
+
+/* Add column card */
+.st-add-col {
+  width: 180px; min-width: 180px; height: 100px;
+  align-self: flex-start; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 7px;
+  background: var(--s0); border: 1px dashed var(--bd1); border-radius: var(--r-xl);
+  cursor: pointer; color: var(--tx2); transition: all 0.18s;
+}
+.st-add-col:hover { background: var(--s1); border-color: var(--bd2); color: var(--tx1); transform: translateY(-2px); }
+
+/* Stratum modal extras */
+.st-cg { display: flex; gap: 8px; flex-wrap: wrap; }
+.st-cswatch { width: 27px; height: 27px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+.st-cswatch:hover { transform: scale(1.18); }
+.st-cswatch.sel { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
+
+.st-pp-list { max-height: 220px; overflow-y: auto; border: 1px solid var(--bd1); border-radius: var(--r-sm); background: var(--s2); }
+.st-pp-group-lbl { padding: 8px 12px 3px; font-size: 10.5px; font-weight: 500; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.6px; background: var(--s2); position: sticky; top: 0; border-bottom: 1px solid var(--bd0); }
+.st-pp-opt { display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 13px; color: var(--tx1); cursor: pointer; transition: background 0.1s; }
+.st-pp-opt:hover { background: var(--s3); color: var(--tx0); }
+.st-pp-opt.sel { background: var(--gold-glow); color: var(--gold); }
+.st-pp-none { padding: 8px 12px; font-size: 13px; color: var(--tx2); cursor: pointer; transition: background 0.1s; font-style: italic; }
+.st-pp-none:hover { background: var(--s3); color: var(--tx1); }
+.st-pp-none.sel { background: var(--gold-glow); color: var(--gold); }
+.st-pp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.st-pp-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-info-txt { font-size: 12px; color: var(--tx2); line-height: 1.5; }
+#st-saving { font-size: 11px; color: var(--tx2); font-family: 'DM Mono', monospace; opacity: 0; transition: opacity 0.3s; }
+#st-saving.vis { opacity: 1; }
+
+/* ════════════════════════════════════════════════════════
+   REP TRACKER APP
+══════════════════════════════════════════════════════════ */
+#screen-rep { flex-direction: column; }
+.rt-body { flex: 1; overflow-y: auto; padding: 16px; max-width: 720px; width: 100%; margin: 0 auto; }
+
+.rt-stats-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.rt-stat { background: var(--s0); border: 1px solid var(--bd0); border-radius: var(--r-md); padding: 10px 16px; text-align: center; flex: 1; min-width: 80px; }
+.rt-stat-num { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--blue); }
+.rt-stat-lbl { font-size: 10.5px; color: var(--tx2); margin-top: 1px; }
+
+.rt-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.rt-tab {
+  padding: 7px 14px; border-radius: var(--r-sm); border: 1px solid var(--bd1);
+  background: var(--s0); color: var(--tx1); cursor: pointer; font-size: 13px; transition: all 0.15s;
+}
+.rt-tab:hover { border-color: var(--blue); color: var(--tx0); }
+.rt-tab.active { background: var(--blue); color: #050f1c; border-color: var(--blue); font-weight: 500; }
+.rt-badge {
+  display: inline-block; background: var(--red); color: #fff;
+  border-radius: 10px; padding: 1px 7px; font-size: 11px; margin-left: 4px;
+}
+
+.rt-task-card {
+  background: var(--s0); border: 1px solid var(--bd0); border-radius: var(--r-md);
+  padding: 13px; margin-bottom: 8px; transition: border-color 0.15s;
+}
+.rt-task-card:hover { border-color: var(--bd1); }
+.rt-task-card.overdue { border-left: 3px solid var(--red); }
+.rt-task-card.due-today { border-left: 3px solid var(--green); }
+.rt-task-name { font-weight: 500; font-size: 14px; margin-bottom: 5px; word-break: break-word; }
+.rt-task-meta { font-size: 12px; color: var(--tx1); display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.rt-task-meta span { white-space: nowrap; }
+.rt-task-notes { font-size: 12px; color: var(--tx2); font-style: italic; margin: 4px 0; }
+.rt-task-links a { font-size: 12px; color: var(--blue); text-decoration: none; margin-right: 8px; }
+.rt-task-links a:hover { text-decoration: underline; }
+.rt-task-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.rt-tag-overdue { color: var(--red); font-weight: 600; font-size: 11.5px; }
+.rt-tag-due     { color: var(--green); font-weight: 600; font-size: 11.5px; }
+.rt-seq-viz     { font-size: 12px; color: var(--purple); }
+
+.rt-form { display: flex; flex-direction: column; gap: 12px; }
+.rt-form input, .rt-form textarea {
+  width: 100%; padding: 9px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--bd1); background: var(--s2);
+  color: var(--tx0); font-family: 'DM Sans', sans-serif; font-size: 13.5px; outline: none;
+}
+.rt-form input:focus, .rt-form textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.rt-form textarea { resize: vertical; min-height: 60px; }
+.rt-form-label { font-size: 11px; font-weight: 500; color: var(--tx1); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; display: block; }
+.rt-form-group { display: flex; flex-direction: column; }
+.rt-form-row { display: flex; gap: 8px; }
+
+.rt-empty { text-align: center; color: var(--tx2); padding: 40px 0; font-size: 13px; }
+
+/* ── Loading spinner ───────────────────────────────── */
+.spinner {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; flex: 1; color: var(--tx2); font-size: 13px;
+}
+.spinner-ring {
+  width: 28px; height: 28px; border: 2px solid var(--bd1);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: AUTH
+════════════════════════════════════════════════════ -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="auth-logo-name">Workspace</span>
+      <span class="auth-logo-sub">your personal command center</span>
+    </div>
+    <div class="auth-fields">
+      <div class="fg">
+        <label class="flabel">Email</label>
+        <input class="finput" type="email" id="auth-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="fg">
+        <label class="flabel">Password</label>
+        <input class="finput" type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <button class="btn btn-gold" id="btn-signin" style="width:100%;justify-content:center;padding:12px">
+      Sign in
+    </button>
+    <div class="auth-hint">Access is restricted to authorised users only.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: HOME
+════════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen">
+  <div class="home-nav">
+    <span class="home-wordmark">Workspace</span>
+    <span class="home-user-email" id="home-email">—</span>
+    <button class="btn btn-ghost btn-sm" onclick="doSignOut()">Sign out</button>
+  </div>
+  <div class="home-body">
+    <div class="home-greeting">
+      <div class="home-greeting-head" id="home-greeting-head">Good morning</div>
+      <div class="home-greeting-sub">Where are you working today?</div>
+    </div>
+    <div class="home-tiles">
+      <div class="app-tile stratum-tile" onclick="openApp('stratum')">
+        <div class="app-tile-icon">◎</div>
+        <div class="app-tile-name">Stratum</div>
+        <div class="app-tile-desc">Goals across time horizons — from today to five years out, all in one view.</div>
+        <div class="app-tile-stats">
+          <div class="tile-stat-item"><div class="tile-stat-num" id="ht-st-goals">—</div><div class="tile-stat-lbl">Active goals</div></div>
+          <div class="tile-stat-item"><div class="tile-stat-num" id="ht-st-cols">—</div><div class="tile-stat-lbl">Horizons</div></div>
+        </div>
+        <span class="tile-arrow">↗</span>
+      </div>
+      <div class="app-tile rep-tile" onclick="openApp('rep')">
+        <div class="app-tile-icon">🔁</div>
+        <div class="app-tile-name">Rep Tracker</div>
+        <div class="app-tile-desc">Spaced repetition for deep learning — never forget what you've practiced.</div>
+        <div class="app-tile-stats">
+          <div class="tile-stat-item"><div class="tile-stat-num" id="ht-rt-due" style="color:var(--green)">—</div><div class="tile-stat-lbl">Due today</div></div>
+          <div class="tile-stat-item"><div class="tile-stat-num" id="ht-rt-ov" style="color:var(--red)">—</div><div class="tile-stat-lbl">Overdue</div></div>
+        </div>
+        <span class="tile-arrow">↗</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: STRATUM
+════════════════════════════════════════════════════ -->
+<div id="screen-stratum" class="screen">
+  <nav class="app-nav">
+    <div class="app-nav-side">
+      <button class="btn btn-ghost btn-sm" onclick="goHome()">← Home</button>
+    </div>
+    <div class="app-nav-title" style="font-family:'Fraunces',serif;color:var(--gold)">Stratum</div>
+    <div class="app-nav-side right" style="gap:8px">
+      <span id="st-saving">Saving…</span>
+      <button class="btn btn-ghost btn-sm" onclick="stOpenColModal()">+ Column</button>
+    </div>
+  </nav>
+  <div id="st-board-wrap">
+    <div id="st-board"></div>
+  </div>
+  <div id="st-mc"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN: REP TRACKER
+════════════════════════════════════════════════════ -->
+<div id="screen-rep" class="screen">
+  <nav class="app-nav">
+    <div class="app-nav-side">
+      <button class="btn btn-ghost btn-sm" onclick="goHome()">← Home</button>
+    </div>
+    <div class="app-nav-title" style="color:var(--blue)">Rep Tracker</div>
+    <div class="app-nav-side right"></div>
+  </nav>
+  <div class="rt-body">
+    <div id="rt-spinner" class="spinner"><div class="spinner-ring"></div><span>Connecting…</span></div>
+    <div id="rt-app" style="display:none">
+      <div class="rt-stats-bar">
+        <div class="rt-stat"><div class="rt-stat-num" id="rt-stat-due" style="color:var(--green)">0</div><div class="rt-stat-lbl">Due Today</div></div>
+        <div class="rt-stat"><div class="rt-stat-num" id="rt-stat-ov" style="color:var(--red)">0</div><div class="rt-stat-lbl">Overdue</div></div>
+        <div class="rt-stat"><div class="rt-stat-num" id="rt-stat-total">0</div><div class="rt-stat-lbl">Total</div></div>
+      </div>
+      <div class="rt-tabs">
+        <div class="rt-tab active" data-rtab="today" onclick="rtSwitchTab('today')">Today <span id="rt-badge-today" class="rt-badge" style="display:none">0</span></div>
+        <div class="rt-tab" data-rtab="overdue" onclick="rtSwitchTab('overdue')">Overdue <span id="rt-badge-ov" class="rt-badge" style="display:none">0</span></div>
+        <div class="rt-tab" data-rtab="all" onclick="rtSwitchTab('all')">All Tasks</div>
+        <div class="rt-tab" data-rtab="add" onclick="rtSwitchTab('add')">+ Add</div>
+      </div>
+      <div id="rt-view-today"><div id="rt-list-today"></div></div>
+      <div id="rt-view-overdue" style="display:none">
+        <button class="btn btn-sm" style="background:var(--orange);color:#0d0500;border:none;margin-bottom:10px" onclick="rtCatchUpAll()">⚡ Catch-Up All Overdue</button>
+        <div id="rt-list-overdue"></div>
+      </div>
+      <div id="rt-view-all" style="display:none">
+        <input class="finput" type="text" id="rt-search" placeholder="Search tasks…" oninput="rtRenderAll()" style="margin-bottom:12px">
+        <div id="rt-list-all"></div>
+      </div>
+      <div id="rt-view-add" style="display:none">
+        <h2 id="rt-form-title" style="font-family:'Fraunces',serif;font-size:18px;font-weight:500;margin-bottom:14px">Add New Task</h2>
+        <input type="hidden" id="rt-edit-id">
+        <div class="rt-form">
+          <div class="rt-form-group"><label class="rt-form-label">Task Name *</label><input type="text" id="rt-f-name" placeholder="e.g. Leetcode 197 — Rising Temperature"></div>
+          <div class="rt-form-group"><label class="rt-form-label">Links (one per line)</label><textarea id="rt-f-links" rows="3" placeholder="https://…"></textarea></div>
+          <div class="rt-form-group"><label class="rt-form-label">Notes</label><textarea id="rt-f-notes" rows="2" placeholder="Optional notes…"></textarea></div>
+          <div class="rt-form-group"><label class="rt-form-label">First Date (defaults to today)</label><input type="date" id="rt-f-date"></div>
+          <div class="rt-form-row">
+            <button class="btn btn-blue" onclick="rtSaveTask()">Save Task</button>
+            <button class="btn btn-ghost" onclick="rtCancelEdit()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="rt-mc"></div>
+</div>
+
+<!-- Shared toast -->
+<div id="toast" class="hidden"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   FIREBASE CONFIG
+════════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "AIzaSyBOl2pAIJFrCG_p2qbmENYnHPs56FE4AeE",
+  authDomain:        "rep-tracker-df2e8.firebaseapp.com",
+  databaseURL:       "https://rep-tracker-df2e8-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  projectId:         "rep-tracker-df2e8",
+  storageBucket:     "rep-tracker-df2e8.firebasestorage.app",
+  messagingSenderId: "1001251936735",
+  appId:             "1:1001251936735:web:e97af917453089d0d68c6a"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+// Persist login across page reloads
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+/* ════════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════════ */
+const uid   = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const esc   = s => { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; };
+const trunc = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
+const $     = id => document.getElementById(id);
+
+let toastTimer = null;
+function showToast(msg, undo) {
+  const el = $('toast');
+  el.innerHTML = undo
+    ? `<span>${esc(msg)}</span><button class="btn btn-xs btn-undo" onclick="rtUndoLast()">↩ Undo</button>`
+    : esc(msg);
+  el.classList.remove('hidden');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), undo ? 5000 : 2500);
+}
+
+/* ════════════════════════════════════════════════════════
+   SCREEN MANAGEMENT
+════════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function goHome() {
+  if (rtListener) { db.ref('tasks').off('value', rtListener); rtListener = null; }
+  updateHomeTileStats();
+  showScreen('screen-home');
+}
+
+function openApp(app) {
+  if (app === 'stratum') {
+    showScreen('screen-stratum');
+    stInit();
+  } else {
+    showScreen('screen-rep');
+    rtInit();
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   AUTH MODULE
+════════════════════════════════════════════════════════ */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    $('home-email').textContent = user.email;
+    updateGreeting();
+    updateHomeTileStats();
+    showScreen('screen-home');
+  } else {
+    showScreen('screen-auth');
+  }
+});
+
+$('btn-signin').addEventListener('click', doSignIn);
+$('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') doSignIn(); });
+$('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') $('auth-password').focus(); });
+
+function doSignIn() {
+  const email = $('auth-email').value.trim();
+  const pass  = $('auth-password').value;
+  $('auth-error').textContent = '';
+  if (!email || !pass) { $('auth-error').textContent = 'Please enter email and password.'; return; }
+  $('btn-signin').textContent = 'Signing in…';
+  $('btn-signin').disabled = true;
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(err => {
+      $('auth-error').textContent = friendlyAuthError(err.code);
+      $('btn-signin').textContent = 'Sign in';
+      $('btn-signin').disabled = false;
+    });
+}
+
+function doSignOut() {
+  if (rtListener) { db.ref('tasks').off('value', rtListener); rtListener = null; }
+  auth.signOut();
+}
+
+function friendlyAuthError(code) {
+  const map = {
+    'auth/invalid-email':          'Invalid email address.',
+    'auth/user-not-found':         'No account found with this email.',
+    'auth/wrong-password':         'Incorrect password.',
+    'auth/invalid-credential':     'Invalid email or password.',
+    'auth/too-many-requests':      'Too many attempts. Try again later.',
+    'auth/user-disabled':          'This account has been disabled.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+  };
+  return map[code] || 'Sign-in failed. Check your credentials.';
+}
+
+function updateGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  $('home-greeting-head').textContent = g;
+}
+
+async function updateHomeTileStats() {
+  // Stratum stats from Firebase
+  try {
+    const snap = await db.ref('stratum').once('value');
+    const data = snap.val();
+    if (data) {
+      const goals   = data.goals   ? (Array.isArray(data.goals)   ? data.goals   : Object.values(data.goals))   : [];
+      const columns = data.columns ? (Array.isArray(data.columns) ? data.columns : Object.values(data.columns)) : [];
+      const active  = goals.filter(g => g && !g.completed).length;
+      $('ht-st-goals').textContent = active;
+      $('ht-st-cols').textContent  = columns.length;
+    } else {
+      $('ht-st-goals').textContent = '0';
+      $('ht-st-cols').textContent  = '0';
+    }
+  } catch(e) { $('ht-st-goals').textContent = '—'; }
+
+  // Rep tracker stats
+  try {
+    const snap = await db.ref('tasks').once('value');
+    const tasks = Object.values(snap.val() || {});
+    const td    = rtTodayStr();
+    $('ht-rt-due').textContent = tasks.filter(t => t.revisionDate === td).length;
+    $('ht-rt-ov').textContent  = tasks.filter(t => rtIsOverdue(t.revisionDate)).length;
+  } catch(e) { $('ht-rt-due').textContent = '—'; }
+}
+
+/* ════════════════════════════════════════════════════════
+   SHARED CONFIRM MODAL
+════════════════════════════════════════════════════════ */
+let confirmPending = null;
+
+function askConfirm(msg, onOk, containerId) {
+  confirmPending = { msg, onOk, containerId: containerId || 'st-mc' };
+  renderConfirm();
+}
+
+function renderConfirm() {
+  if (!confirmPending) return;
+  const el = $(confirmPending.containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="overlay" onclick="if(event.target===this)cancelConfirm()">
+    <div class="modal" style="max-width:340px">
+      <div class="modal-hdr"><div class="modal-title">Are you sure?</div></div>
+      <div class="modal-body"><p style="font-size:13.5px;color:var(--tx1);line-height:1.6">${esc(confirmPending.msg)}</p></div>
+      <div class="modal-foot">
+        <div class="modal-foot-spacer"></div>
+        <button class="btn btn-ghost" onclick="cancelConfirm()">Cancel</button>
+        <button class="btn btn-danger" onclick="okConfirm()">Delete</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function okConfirm() {
+  if (!confirmPending) return;
+  const fn = confirmPending.onOk;
+  const cid = confirmPending.containerId;
+  confirmPending = null;
+  const el = $(cid); if (el) el.innerHTML = '';
+  fn();
+}
+
+function cancelConfirm() {
+  if (!confirmPending) return;
+  const cid = confirmPending.containerId;
+  confirmPending = null;
+  const el = $(cid); if (el) el.innerHTML = '';
+}
+
+/* ════════════════════════════════════════════════════════
+   STRATUM MODULE
+════════════════════════════════════════════════════════ */
+const ST_COLORS = ['#9b74e0','#c9a84c','#e07b7b','#57b5b0','#6fa4d4','#7dbc82','#c97fa5','#d4895e'];
+
+let S = { columns: [], goals: [], doneVis: {} };
+let stOpenMenu  = null;
+let stFocusGid  = null;
+let stInlineCol = null;
+let stModal     = null;
+let stPending   = null;
+let stDragSrc   = null;
+let stSaveTimer = null;
+let stLoaded    = false;
+let stSavingTimer = null;
+
+function stDefaultState() {
+  const c1 = uid(), c2 = uid(), c3 = uid(), c4 = uid();
+  return {
+    columns: [
+      { id: c1, title: '5 Years',    color: '#9b74e0' },
+      { id: c2, title: '1 Year',     color: '#c9a84c' },
+      { id: c3, title: 'This Month', color: '#6fa4d4' },
+      { id: c4, title: 'Today',      color: '#7dbc82' },
+    ],
+    goals: [
+      { id: uid(), columnId: c1, text: 'Example: Build a product used by thousands', notes: 'Dream big — this is your north star.', parentGoalId: null, completed: false, createdAt: Date.now() },
+      { id: uid(), columnId: c2, text: 'Example: Launch an MVP', notes: '', parentGoalId: null, completed: false, createdAt: Date.now() },
+    ],
+    doneVis: {}
+  };
+}
+
+async function stInit() {
+  if (stLoaded) { stRender(); return; }
+  try {
+    const snap = await db.ref('stratum').once('value');
+    const data = snap.val();
+    if (data && data.columns) {
+      const toArr = v => v ? (Array.isArray(v) ? v : Object.values(v)).filter(Boolean) : [];
+      S = { columns: toArr(data.columns), goals: toArr(data.goals), doneVis: data.doneVis || {} };
+    } else {
+      S = stDefaultState();
+      stSave();
+    }
+    stLoaded = true;
+    stRender();
+  } catch(e) {
+    S = stDefaultState();
+    stLoaded = true;
+    stRender();
+  }
+}
+
+function stSave() {
+  clearTimeout(stSaveTimer);
+  stSaveTimer = setTimeout(() => {
+    const el = $('st-saving');
+    if (el) { el.classList.add('vis'); }
+    db.ref('stratum').set({
+      columns: S.columns,
+      goals:   S.goals,
+      doneVis: S.doneVis
+    }).then(() => {
+      if (el) {
+        clearTimeout(stSavingTimer);
+        stSavingTimer = setTimeout(() => el.classList.remove('vis'), 800);
+      }
+    });
+  }, 500);
+}
+
+/* Derived */
+const stColGoals  = cid => S.goals.filter(g => g.columnId === cid);
+const stFindGoal  = id  => S.goals.find(g => g.id === id);
+const stFindCol   = id  => S.columns.find(c => c.id === id);
+const stChildren  = pid => S.goals.filter(g => g.parentGoalId === pid);
+function stAllDesc(gid) {
+  const ids = [], q = [gid];
+  while (q.length) { const c = q.shift(); stChildren(c).forEach(x => { ids.push(x.id); q.push(x.id); }); }
+  return ids;
+}
+function stAncestors(gid) {
+  const ids = []; let cur = stFindGoal(gid);
+  while (cur && cur.parentGoalId) { const p = stFindGoal(cur.parentGoalId); if (p) ids.push(p.id); cur = p; }
+  return ids;
+}
+
+/* ── Render ──────────────────────────────────────── */
+function stRender() { stRenderBoard(); stRenderModal(); }
+
+function stRenderBoard() {
+  const board = $('st-board');
+  if (!board) return;
+
+  if (!S.columns.length) {
+    board.innerHTML = `<div id="st-empty-board">
+      <div class="st-empty-board-head">Where will you be?</div>
+      <p style="font-size:13px;color:var(--tx2)">Create your first time horizon to begin.</p>
+      <button class="btn btn-gold" data-sa="new-col">+ Add First Column</button>
+    </div>`;
+    return;
+  }
+
+  const self = stFocusGid;
+  const anc  = self ? stAncestors(self)  : [];
+  const des  = self ? stAllDesc(self)    : [];
+
+  board.innerHTML =
+    S.columns.map(col => stRenderCol(col, self, anc, des)).join('') +
+    `<div class="st-add-col" data-sa="new-col"><div style="font-size:20px">＋</div><div style="font-size:12px">Add Column</div></div>`;
+
+  stBindDrag();
+  if (stInlineCol) {
+    const ta = $(`st-ita-${stInlineCol}`);
+    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }
+}
+
+function stRenderCol(col, self, anc, des) {
+  const active   = stColGoals(col.id).filter(g => !g.completed);
+  const done     = stColGoals(col.id).filter(g => g.completed);
+  const showDone = S.doneVis[col.id];
+
+  const activeHtml = active.map(g => stRenderCard(g, col, self, anc, des)).join('');
+  const doneHtml   = done.length ? `
+    <div class="st-done-hdr" data-sa="toggle-done" data-cid="${col.id}">
+      <span class="st-done-arrow ${showDone ? 'open' : ''}">›</span>
+      <span>${done.length} completed</span>
+    </div>
+    ${showDone ? done.map(g => stRenderCard(g, col, self, anc, des)).join('') : ''}
+  ` : '';
+
+  const inlineHtml = stInlineCol === col.id ? `
+    <div class="st-inline-wrap">
+      <textarea id="st-ita-${col.id}" class="st-inline-ta" rows="3" placeholder="Write your goal…" data-cid="${col.id}"></textarea>
+      <div class="st-inline-row">
+        <span class="st-inline-hint">⌘↵ to save · Esc to cancel</span>
+        <button class="btn btn-ghost btn-xs" data-sa="cancel-inline">Cancel</button>
+        <button class="btn btn-gold btn-xs" data-sa="save-inline" data-cid="${col.id}">Add</button>
+      </div>
+    </div>` : '';
+
+  const isEmpty  = !active.length && !inlineHtml;
+  const parts    = [];
+  if (active.length) parts.push(`${active.length} active`);
+  if (done.length)   parts.push(`${done.length} done`);
+  const countStr = parts.join(' · ') || 'empty';
+
+  const menuHtml = stOpenMenu === col.id ? `
+    <div class="st-col-menu">
+      <div class="st-menu-item" data-sa="edit-col" data-cid="${col.id}"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Edit column</div>
+      <div class="st-menu-item" data-sa="col-left"  data-cid="${col.id}"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Move left</div>
+      <div class="st-menu-item" data-sa="col-right" data-cid="${col.id}"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>Move right</div>
+      <div class="st-menu-divider"></div>
+      <div class="st-menu-item d" data-sa="del-col" data-cid="${col.id}"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Delete column</div>
+    </div>` : '';
+
+  return `<div class="st-col" id="stcol-${col.id}" data-cid="${col.id}" draggable="true">
+    ${menuHtml}
+    <div class="st-col-hdr">
+      <div class="st-stripe" style="background:${col.color}"></div>
+      <div class="st-col-hdr-row">
+        <div>
+          <div class="st-col-title" data-sa="edit-col" data-cid="${col.id}">${esc(col.title)}</div>
+          <div class="st-col-count">${esc(countStr)}</div>
+        </div>
+        <div class="st-col-btns">
+          <div class="icon-btn" data-sa="col-menu" data-cid="${col.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div>
+        </div>
+      </div>
+    </div>
+    <div class="st-col-body" id="stcb-${col.id}">
+      ${inlineHtml}
+      ${activeHtml}
+      ${isEmpty && !inlineHtml ? `<div class="st-empty-col"><div class="st-empty-col-ico">◎</div><div class="st-empty-col-txt">No goals yet.<br>Add one below.</div></div>` : ''}
+      ${doneHtml}
+    </div>
+    <div class="st-col-foot">
+      <button class="st-btn-add" data-sa="start-inline" data-cid="${col.id}">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add goal
+      </button>
+    </div>
+  </div>`;
+}
+
+function stRenderCard(g, col, self, anc, des) {
+  let cls = '';
+  if (self) {
+    if (g.id === self)          cls = 'hl-self';
+    else if (anc.includes(g.id)) cls = 'hl-parent';
+    else if (des.includes(g.id)) cls = 'hl-child';
+    else                        cls = 'dim';
+  }
+  const parent  = g.parentGoalId ? stFindGoal(g.parentGoalId) : null;
+  const parentC = parent ? stFindCol(parent.columnId) : null;
+  const kc      = stChildren(g.id).length;
+  let meta = '';
+  if (parent) meta += `<div class="st-parent-chip" data-sa="focus-goal" data-gid="${parent.id}" style="color:${parentC ? parentC.color : 'var(--gold)'};border-color:${parentC ? parentC.color+'44' : ''}">
+    <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+    <span class="st-parent-chip-txt" title="${esc(parent.text)}">${esc(trunc(parent.text, 32))}</span></div>`;
+  if (kc) meta += `<div class="st-child-chip"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>${kc} sub-goal${kc > 1 ? 's' : ''}</div>`;
+
+  return `<div class="st-gcard ${g.completed ? 'done' : ''} ${cls}" id="stgc-${g.id}" data-gid="${g.id}" style="--col-c:${col.color}" data-sa="focus-goal">
+    <div class="st-gcard-row">
+      <div class="st-gcheck" data-sa="toggle-goal" data-gid="${g.id}">
+        <svg class="st-gcheck-ico" width="8" height="8" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="st-gtext-wrap">
+        <div class="st-gtext" data-sa="edit-goal" data-gid="${g.id}">${esc(g.text)}</div>
+        ${g.notes ? `<div class="st-gnotes">${esc(trunc(g.notes, 90))}</div>` : ''}
+        ${meta ? `<div class="st-gmeta">${meta}</div>` : ''}
+      </div>
+      <div class="st-gcard-btns">
+        <div class="icon-btn" data-sa="link-goal" data-gid="${g.id}" title="Link to parent"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+        <div class="icon-btn d" data-sa="del-goal" data-gid="${g.id}" title="Delete"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── Stratum modals ──────────────────────────────── */
+function stRenderModal() {
+  const mc = $('st-mc'); if (!mc) return;
+  if (!stModal) { mc.innerHTML = ''; return; }
+  if (stModal.type === 'col')  mc.innerHTML = stColModal();
+  if (stModal.type === 'goal') mc.innerHTML = stGoalModal();
+}
+
+function stColModal() {
+  const col  = stModal.data.cid ? stFindCol(stModal.data.cid) : null;
+  const isEd = !!col;
+  const name = stModal.data.name ?? (col?.title || '');
+  const selC = stModal.data.color ?? (col?.color || ST_COLORS[0]);
+  return `<div class="overlay" onclick="if(event.target===this){stModal=null;stRender();}">
+    <div class="modal"><div class="modal-hdr">
+      <div class="modal-title">${isEd ? 'Edit Column' : 'New Column'}</div>
+      <div class="icon-btn" data-sa="st-close"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="flabel">Column name</label><input id="st-ci-name" class="finput" type="text" placeholder="e.g. 5 Years · This Quarter" value="${esc(name)}" autofocus></div>
+      <div class="fg"><label class="flabel">Accent color</label>
+        <div class="st-cg">${ST_COLORS.map(c => `<div class="st-cswatch ${c===selC?'sel':''}" style="background:${c}" data-sa="pick-color" data-color="${c}"></div>`).join('')}</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      ${isEd ? `<button class="btn btn-danger btn-sm" data-sa="del-col" data-cid="${col.id}">Delete column</button>` : ''}
+      <div class="modal-foot-spacer"></div>
+      <button class="btn btn-ghost" data-sa="st-close">Cancel</button>
+      <button class="btn btn-gold" data-sa="save-col" data-cid="${col?.id||''}">${isEd ? 'Save changes' : 'Create column'}</button>
+    </div></div></div>`;
+}
+
+function stGoalModal() {
+  const g    = stModal.data.gid ? stFindGoal(stModal.data.gid) : null;
+  const isEd = !!g;
+  const cid  = stModal.data.cid || g?.columnId;
+  const text = stModal.data.text  ?? (g?.text  || '');
+  const notes= stModal.data.notes ?? (g?.notes || '');
+  const pid  = stModal.data.pid !== undefined ? stModal.data.pid : (g?.parentGoalId || null);
+  return `<div class="overlay" onclick="if(event.target===this){stModal=null;stRender();}">
+    <div class="modal"><div class="modal-hdr">
+      <div class="modal-title">${isEd ? 'Edit Goal' : 'New Goal'}</div>
+      <div class="icon-btn" data-sa="st-close"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="flabel">Goal</label><textarea id="st-gi-text" class="ftextarea" style="min-height:68px">${esc(text)}</textarea></div>
+      <div class="fg"><label class="flabel">Notes <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label><textarea id="st-gi-notes" class="ftextarea" style="min-height:52px">${esc(notes)}</textarea></div>
+      <div class="fg"><label class="flabel">Links to a bigger goal <span style="font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <div class="st-pp-list">${stPPOptions(cid, pid)}</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      ${isEd ? `<button class="btn btn-danger btn-sm" data-sa="del-goal" data-gid="${g.id}">Delete</button>` : ''}
+      <div class="modal-foot-spacer"></div>
+      <button class="btn btn-ghost" data-sa="st-close">Cancel</button>
+      <button class="btn btn-gold" data-sa="save-goal" data-cid="${cid}" data-gid="${g?.id||''}" data-pid="${pid||''}">${isEd ? 'Save changes' : 'Add goal'}</button>
+    </div></div></div>`;
+}
+
+function stPPOptions(currentCid, selectedPid) {
+  const others = S.columns.filter(c => c.id !== currentCid);
+  if (!others.length) return `<div class="st-pp-none sel">No other columns yet</div>`;
+  let html = `<div class="st-pp-none ${!selectedPid?'sel':''}" data-sa="sel-parent" data-pid="">— No parent (standalone) —</div>`;
+  for (const col of others) {
+    const gs = stColGoals(col.id).filter(g => !g.completed);
+    if (!gs.length) continue;
+    html += `<div class="st-pp-group-lbl" style="color:${col.color}">${esc(col.title)}</div>`;
+    html += gs.map(g => `<div class="st-pp-opt ${g.id===selectedPid?'sel':''}" data-sa="sel-parent" data-pid="${g.id}"><div class="st-pp-dot" style="background:${col.color}"></div><span class="st-pp-txt" title="${esc(g.text)}">${esc(trunc(g.text, 62))}</span></div>`).join('');
+  }
+  return html;
+}
+
+/* ── Events ──────────────────────────────────────── */
+$('screen-stratum').addEventListener('click', stHandleClick);
+document.addEventListener('keydown', stHandleKey);
+
+function stHandleClick(e) {
+  const el = e.target.closest('[data-sa]');
+  if (!el) {
+    if (stOpenMenu) { stOpenMenu = null; stRender(); }
+    else if (stFocusGid && !e.target.closest('.st-gcard')) { stFocusGid = null; stRender(); }
+    return;
+  }
+  e.stopPropagation();
+  const a   = el.dataset.sa;
+  const cid = el.dataset.cid;
+  const gid = el.dataset.gid;
+  const pid = el.dataset.pid;
+
+  switch(a) {
+    case 'new-col':   stOpenColModal(); break;
+    case 'st-close':  stModal = null; stRender(); break;
+    case 'col-menu':  stOpenMenu = stOpenMenu === cid ? null : cid; stRender(); break;
+    case 'edit-col':  stOpenMenu = null; stOpenColModal(cid); break;
+
+    case 'del-col': {
+      stOpenMenu = null;
+      const c = stFindCol(cid); if (!c) break;
+      askConfirm(`Delete "${c.title}" and all its goals? This cannot be undone.`, () => {
+        const dead = S.goals.filter(g => g.columnId === cid).map(g => g.id);
+        S.goals   = S.goals.filter(g => g.columnId !== cid);
+        S.goals.forEach(g => { if (dead.includes(g.parentGoalId)) g.parentGoalId = null; });
+        S.columns = S.columns.filter(x => x.id !== cid);
+        stModal = null; stSave(); stRender();
+      }, 'st-mc');
+      break;
+    }
+
+    case 'col-left': {
+      stOpenMenu = null;
+      const i = S.columns.findIndex(c => c.id === cid);
+      if (i > 0) { [S.columns[i-1], S.columns[i]] = [S.columns[i], S.columns[i-1]]; stSave(); stRender(); }
+      break;
+    }
+    case 'col-right': {
+      stOpenMenu = null;
+      const i = S.columns.findIndex(c => c.id === cid);
+      if (i < S.columns.length-1) { [S.columns[i+1], S.columns[i]] = [S.columns[i], S.columns[i+1]]; stSave(); stRender(); }
+      break;
+    }
+
+    case 'start-inline':  stInlineCol = cid; stRender(); break;
+    case 'cancel-inline': stInlineCol = null; stRender(); break;
+
+    case 'save-inline': {
+      const ta = $(`st-ita-${cid}`);
+      const t  = ta?.value.trim();
+      if (t) { S.goals.push({ id: uid(), columnId: cid, text: t, notes: '', parentGoalId: null, completed: false, createdAt: Date.now() }); stSave(); }
+      stInlineCol = null; stRender(); break;
+    }
+
+    case 'toggle-goal': {
+      const g = stFindGoal(gid); if (g) { g.completed = !g.completed; stSave(); stRender(); } break;
+    }
+
+    case 'edit-goal': case 'link-goal': stOpenGoalModal(gid); break;
+
+    case 'del-goal': {
+      const g = stFindGoal(gid); if (!g) break;
+      askConfirm(`Delete "${trunc(g.text, 60)}"?`, () => {
+        S.goals.forEach(x => { if (x.parentGoalId === gid) x.parentGoalId = null; });
+        S.goals = S.goals.filter(x => x.id !== gid);
+        stFocusGid = null; stModal = null; stSave(); stRender();
+      }, 'st-mc');
+      break;
+    }
+
+    case 'focus-goal': stFocusGid = stFocusGid === gid ? null : gid; stRender(); break;
+    case 'toggle-done': S.doneVis[cid] = !S.doneVis[cid]; stSave(); stRender(); break;
+
+    case 'pick-color':
+      stModal.data.name  = $('st-ci-name')?.value ?? stModal.data.name;
+      stModal.data.color = el.dataset.color;
+      stRenderModal(); break;
+
+    case 'sel-parent':
+      stModal.data.text  = $('st-gi-text')?.value  ?? stModal.data.text;
+      stModal.data.notes = $('st-gi-notes')?.value ?? stModal.data.notes;
+      stModal.data.pid   = pid || null;
+      stRenderModal(); break;
+
+    case 'save-col': {
+      const nameEl = $('st-ci-name');
+      const nm = nameEl?.value.trim();
+      if (!nm) { if (nameEl) { nameEl.classList.add('err'); nameEl.focus(); } return; }
+      const colC = stModal.data.color || ST_COLORS[0];
+      if (cid) { const c = stFindCol(cid); if (c) { c.title = nm; c.color = colC; } }
+      else     { S.columns.push({ id: uid(), title: nm, color: colC }); }
+      stModal = null; stSave(); stRender(); break;
+    }
+
+    case 'save-goal': {
+      const tEl = $('st-gi-text'), nEl = $('st-gi-notes');
+      const t   = tEl?.value.trim();
+      if (!t) { if (tEl) { tEl.classList.add('err'); tEl.focus(); } return; }
+      const ns = nEl?.value.trim() || '';
+      const sp = stModal.data.pid || null;
+      if (gid) { const g = stFindGoal(gid); if (g) { g.text = t; g.notes = ns; g.parentGoalId = sp; } }
+      else     { S.goals.push({ id: uid(), columnId: cid, text: t, notes: ns, parentGoalId: sp, completed: false, createdAt: Date.now() }); }
+      stModal = null; stSave(); stRender(); break;
+    }
+  }
+}
+
+function stHandleKey(e) {
+  if ($('screen-stratum').classList.contains('active')) {
+    if (e.key === 'Escape') {
+      if (stModal)     { stModal = null; stRender(); return; }
+      if (stInlineCol) { stInlineCol = null; stRender(); return; }
+      if (stFocusGid)  { stFocusGid = null; stRender(); return; }
+      if (stOpenMenu)  { stOpenMenu = null; stRender(); return; }
+    }
+    if (e.key === 'Enter' && e.target.id === 'st-ci-name') {
+      $('screen-stratum').querySelector('[data-sa="save-col"]')?.click();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      if (['st-gi-text','st-gi-notes'].includes(e.target.id))
+        $('screen-stratum').querySelector('[data-sa="save-goal"]')?.click();
+      if (e.target.id?.startsWith('st-ita-'))
+        $('screen-stratum').querySelector(`[data-sa="save-inline"][data-cid="${e.target.id.slice(7)}"]`)?.click();
+    }
+  }
+}
+
+function stOpenColModal(cid) {
+  stOpenMenu = null;
+  stModal = { type: 'col', data: { cid: cid || null, name: '', color: ST_COLORS[0] } };
+  stRender();
+}
+function stOpenGoalModal(gid, cid) {
+  stModal = { type: 'goal', data: { gid: gid || null, cid: cid || null } };
+  stRender();
+}
+
+function stBindDrag() {
+  document.querySelectorAll('.st-col[draggable]').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      stDragSrc = el.dataset.cid;
+      setTimeout(() => el.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.st-col').forEach(c => c.classList.remove('drag-over'));
+      stDragSrc = null;
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.st-col').forEach(c => c.classList.remove('drag-over'));
+      if (el.dataset.cid !== stDragSrc) el.classList.add('drag-over');
+    });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      const tgt = el.dataset.cid;
+      if (stDragSrc && tgt && stDragSrc !== tgt) {
+        const si = S.columns.findIndex(c => c.id === stDragSrc);
+        const ti = S.columns.findIndex(c => c.id === tgt);
+        const [mv] = S.columns.splice(si, 1);
+        S.columns.splice(ti, 0, mv);
+        stSave(); stRender();
+      }
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════════
+   REP TRACKER MODULE
+════════════════════════════════════════════════════════ */
+let rtAllTasks = {};
+let rtCurrentTab = 'today';
+let rtUndoStack  = [];
+let rtListener   = null;
+
+/* ── Date helpers ────────────────────────────────── */
+function rtTodayStr() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+function rtParseDate(s) { const [d,m,y] = s.split('/').map(Number); return new Date(y, m-1, d); }
+function rtFmtDate(d) { return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+function rtDaysBetween(a, b) { return Math.round((b-a)/86400000); }
+function rtIsToday(ds)  { return ds === rtTodayStr(); }
+function rtIsOverdue(ds){ return rtParseDate(ds) < new Date(new Date().toDateString()); }
+function rtHtmlToDate(h){ const [y,m,d] = h.split('-'); return `${d}/${m}/${y}`; }
+function rtDateToHtml(s){ const [d,m,y] = s.split('/'); return `${y}-${m}-${d}`; }
+
+/* ── Spaced repetition ───────────────────────────── */
+function rtNextRev(task) {
+  const seq = task.latestUsedSeqNumber;
+  const inc = seq === 0 ? 3 : seq + 2;
+  const nd  = new Date(rtParseDate(task.revisionDate)); nd.setDate(nd.getDate() + inc);
+  return { newRevisionDate: rtFmtDate(nd), previousRevisionDate: task.revisionDate,
+           newRepetitionCount: task.repetitionCount + 1, newSeqNumber: seq === 0 ? 3 : seq + 2 };
+}
+function rtCatchUpTask(task) {
+  const today = new Date(new Date().toDateString());
+  let revDate = rtParseDate(task.revisionDate), seq = task.latestUsedSeqNumber,
+      rep = task.repetitionCount, od = task.overDueCount || 0, prev = revDate;
+  while (revDate < today) {
+    const inc = seq === 0 ? 3 : seq + 2;
+    prev = revDate; revDate = new Date(revDate); revDate.setDate(revDate.getDate() + inc);
+    seq = seq === 0 ? 3 : seq + 2; rep++; od++;
+  }
+  return { revisionDate: rtFmtDate(revDate), previousRevisionDate: rtFmtDate(prev),
+           latestUsedSeqNumber: seq, repetitionCount: rep, overDueCount: od };
+}
+
+/* ── Firebase ────────────────────────────────────── */
+const rtRef    = () => db.ref('tasks');
+const rtUpdate = (k, u) => rtRef().child(k).update(u);
+const rtDelete = k => rtRef().child(k).remove();
+const rtAdd    = t => rtRef().push().set(t);
+
+function rtInit() {
+  if (rtListener) return; // already listening
+  $('rt-spinner').style.display = '';
+  $('rt-app').style.display = 'none';
+  $('rt-f-date').value = new Date().toISOString().split('T')[0];
+
+  rtListener = rtRef().on('value', snap => {
+    rtAllTasks = snap.val() || {};
+    $('rt-spinner').style.display = 'none';
+    $('rt-app').style.display = '';
+    rtRenderStats();
+    rtRenderCurrentTab();
+  }, err => {
+    $('rt-spinner').innerHTML = `<span style="color:var(--red)">❌ Connection failed</span>`;
+  });
+}
+
+/* ── Render ──────────────────────────────────────── */
+function rtGetList() { return Object.entries(rtAllTasks).map(([k,t]) => ({...t, _key: k})); }
+
+function rtRenderStats() {
+  const tasks = rtGetList(), td = rtTodayStr();
+  const due = tasks.filter(t => t.revisionDate === td).length;
+  const ov  = tasks.filter(t => rtIsOverdue(t.revisionDate)).length;
+  $('rt-stat-due').textContent   = due;
+  $('rt-stat-ov').textContent    = ov;
+  $('rt-stat-total').textContent = tasks.length;
+  const bT = $('rt-badge-today'), bO = $('rt-badge-ov');
+  bT.textContent = due; bT.style.display = due > 0 ? '' : 'none';
+  bO.textContent = ov;  bO.style.display = ov > 0 ? '' : 'none';
+}
+
+function rtRenderCurrentTab() {
+  if (rtCurrentTab === 'today')  rtRenderToday();
+  else if (rtCurrentTab === 'overdue') rtRenderOverdue();
+  else if (rtCurrentTab === 'all')     rtRenderAll();
+}
+
+function rtRenderToday() {
+  const tasks = rtGetList().filter(t => rtIsToday(t.revisionDate)).sort((a,b) => (a.taskName||'').localeCompare(b.taskName||''));
+  $('rt-list-today').innerHTML = tasks.length === 0
+    ? '<div class="rt-empty">🎉 No tasks due today!</div>'
+    : tasks.map(rtTaskCard).join('');
+}
+
+function rtRenderOverdue() {
+  const tasks = rtGetList().filter(t => rtIsOverdue(t.revisionDate)).sort((a,b) => rtParseDate(a.revisionDate) - rtParseDate(b.revisionDate));
+  $('rt-list-overdue').innerHTML = tasks.length === 0
+    ? '<div class="rt-empty">✅ No overdue tasks!</div>'
+    : tasks.map(rtTaskCard).join('');
+}
+
+function rtRenderAll() {
+  const q = ($('rt-search')?.value || '').toLowerCase();
+  let tasks = rtGetList();
+  if (q) tasks = tasks.filter(t => (t.taskName||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q));
+  tasks.sort((a,b) => rtParseDate(a.revisionDate) - rtParseDate(b.revisionDate));
+  $('rt-list-all').innerHTML = tasks.length === 0
+    ? '<div class="rt-empty">No tasks found.</div>'
+    : tasks.map(rtTaskCard).join('');
+}
+
+function rtTaskCard(t) {
+  const ov  = rtIsOverdue(t.revisionDate), due = rtIsToday(t.revisionDate);
+  const dov = ov ? rtDaysBetween(rtParseDate(t.revisionDate), new Date()) : 0;
+  const ns  = t.latestUsedSeqNumber === 0 ? 3 : t.latestUsedSeqNumber + 2;
+  const links = (t.links||[]).filter(l=>l).map((l,i) => `<a href="${l}" target="_blank" rel="noopener">Link ${i+1}</a>`).join('');
+  const tag = ov  ? `<span class="rt-tag-overdue">OVERDUE (${dov}d)</span>`
+            : due ? `<span class="rt-tag-due">DUE TODAY</span>` : '';
+
+  return `<div class="rt-task-card ${ov?'overdue':''} ${due?'due-today':''}">
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+      <div class="rt-task-name">${esc(t.taskName)}</div>${tag}
+    </div>
+    <div class="rt-task-meta">
+      <span>📅 ${t.revisionDate}</span>
+      <span>🔁 ×${t.repetitionCount}</span>
+      <span class="rt-seq-viz">Next: +${ns}d</span>
+      ${(t.overDueCount||0)>0 ? `<span style="color:var(--orange)">⚠ Skip:${t.overDueCount}</span>` : ''}
+      <span>📌 Since: ${t.firstDate}</span>
+    </div>
+    ${t.notes ? `<div class="rt-task-notes">${esc(t.notes)}</div>` : ''}
+    ${links   ? `<div class="rt-task-links">${links}</div>` : ''}
+    <div class="rt-task-actions">
+      ${(due||ov) ? `<button class="btn btn-sm" style="background:var(--green);color:#0a1a0a;border:none" onclick="rtMarkDone('${t._key}')">✓ Done</button>` : ''}
+      ${ov        ? `<button class="btn btn-sm" style="background:var(--orange);color:#0d0500;border:none" onclick="rtCatchUpOne('${t._key}')">⚡ Catch-Up</button>` : ''}
+      <button class="btn btn-ghost btn-sm" onclick="rtEditTask('${t._key}')">✏️ Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="rtConfirmDelete('${t._key}')">🗑 Delete</button>
+    </div>
+  </div>`;
+}
+
+/* ── Actions ─────────────────────────────────────── */
+function rtMarkDone(key) {
+  const t = rtAllTasks[key]; if (!t) return;
+  rtUndoStack.push({ key, snapshot: { revisionDate: t.revisionDate, previousRevisionDate: t.previousRevisionDate,
+    repetitionCount: t.repetitionCount, latestUsedSeqNumber: t.latestUsedSeqNumber }, name: t.taskName });
+  if (rtUndoStack.length > 10) rtUndoStack.shift();
+  const next = rtNextRev(t);
+  rtUpdate(key, { revisionDate: next.newRevisionDate, previousRevisionDate: next.previousRevisionDate,
+                   repetitionCount: next.newRepetitionCount, latestUsedSeqNumber: next.newSeqNumber });
+  showToast(`Next: ${next.newRevisionDate} (+${next.newSeqNumber}d)`, true);
+}
+
+function rtUndoLast() {
+  if (!rtUndoStack.length) return;
+  const last = rtUndoStack.pop();
+  rtUpdate(last.key, last.snapshot);
+  showToast(`↩ Undone: ${last.name}`);
+}
+
+function rtCatchUpOne(key) {
+  const t = rtAllTasks[key]; if (!t) return;
+  const r = rtCatchUpTask(t);
+  rtUpdate(key, r);
+  showToast(`Caught up → ${r.revisionDate}`);
+}
+
+function rtCatchUpAll() {
+  const tasks = rtGetList().filter(t => rtIsOverdue(t.revisionDate));
+  tasks.forEach(t => rtUpdate(t._key, rtCatchUpTask(t)));
+  showToast(`Caught up ${tasks.length} tasks`);
+}
+
+function rtEditTask(key) {
+  const t = rtAllTasks[key]; if (!t) return;
+  $('rt-edit-id').value  = key;
+  $('rt-f-name').value   = t.taskName || '';
+  $('rt-f-links').value  = (t.links||[]).join('\n');
+  $('rt-f-notes').value  = t.notes || '';
+  $('rt-f-date').value   = rtDateToHtml(t.firstDate);
+  $('rt-form-title').textContent = 'Edit Task';
+  rtSwitchTab('add');
+}
+
+function rtCancelEdit() {
+  $('rt-edit-id').value = ''; $('rt-f-name').value = '';
+  $('rt-f-links').value = ''; $('rt-f-notes').value = '';
+  $('rt-f-date').value  = new Date().toISOString().split('T')[0];
+  $('rt-form-title').textContent = 'Add New Task';
+  rtSwitchTab('today');
+}
+
+function rtSaveTask() {
+  const name = $('rt-f-name').value.trim();
+  if (!name) { $('rt-f-name').classList.add('err'); $('rt-f-name').focus(); return; }
+  $('rt-f-name').classList.remove('err');
+  const links   = $('rt-f-links').value.split('\n').map(l=>l.trim()).filter(l=>l);
+  const notes   = $('rt-f-notes').value.trim();
+  const dateVal = $('rt-f-date').value;
+  const editKey = $('rt-edit-id').value;
+  if (editKey) {
+    rtUpdate(editKey, { taskName: name, links, notes });
+    showToast('Task updated');
+  } else {
+    const ds = dateVal ? rtHtmlToDate(dateVal) : rtTodayStr();
+    rtAdd({ taskName: name, firstDate: ds, revisionDate: ds, previousRevisionDate: ds,
+            repetitionCount: -1, latestUsedSeqNumber: 0, overDueCount: 0, links, notes });
+    showToast('Task added');
+  }
+  rtCancelEdit();
+}
+
+function rtConfirmDelete(key) {
+  const t = rtAllTasks[key]; if (!t) return;
+  askConfirm(`Delete "${t.taskName}"?`, () => {
+    rtDelete(key);
+    showToast('Task deleted');
+  }, 'rt-mc');
+}
+
+function rtSwitchTab(tab) {
+  rtCurrentTab = tab;
+  document.querySelectorAll('.rt-tab').forEach(t => t.classList.toggle('active', t.dataset.rtab === tab));
+  ['today','overdue','all','add'].forEach(v => {
+    const el = $(`rt-view-${v}`);
+    if (el) el.style.display = v === tab ? '' : 'none';
+  });
+  rtRenderCurrentTab();
+}
+</script>
+</body>
+</html>
